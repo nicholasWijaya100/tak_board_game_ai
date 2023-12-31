@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 import global from './Global'
 import { Clsboard } from './Clsboard'
 
@@ -22,13 +19,18 @@ function App() {
                                 [[], [], [], [], []],
                               ])
                           );
-  var [batu, setBatu] = useState(global.flat);
-  var [giliran, setGiliran] = useState(global.BLACKTURN);
+
+  var [giliran, setGiliran] = useState(global.WHITETURN);
   var [jumMelangkah, setJumMelangkah] = useState(0);
+  var [selectedStone, setSelectedStone] = useState(jumMelangkah === 1 ? (giliran === global.WHITETURN ? global.FLATSTONE_WHITE : global.FLATSTONE_BLACK) : global.FLATSTONE_BLACK);
   var [maxLevel, setMaxLevel] = useState(1);
 
   useEffect(() => {
   }, []);
+
+  function selectStoneType(stoneType) {
+    setSelectedStone(stoneType);
+  }
 
   function findWeight(_papan) {
     var weight = 0;   
@@ -240,42 +242,76 @@ function App() {
   }
 
   function gantiGiliran() {
-    if(giliran == global.BLACKTURN) { setGiliran(global.WHITETURN); }
-    else { setGiliran(global.BLACKTURN); }
+    setJumMelangkah(jumMelangkah + 1);
+    if(giliran == global.BLACKTURN) { 
+      setGiliran(global.WHITETURN); 
+      if(jumMelangkah < 1) {
+        setSelectedStone(global.FLATSTONE_BLACK);
+      } else {
+        setSelectedStone(global.FLATSTONE_WHITE);
+      }
+    }
+    else { 
+      setGiliran(global.BLACKTURN); 
+      if(jumMelangkah < 1) {
+        setSelectedStone(global.FLATSTONE_WHITE);
+      } else {
+        setSelectedStone(global.FLATSTONE_BLACK);
+      }
+    }
   }
 
   function bukadiv(brs, klm) {
-    if(giliran == global.BLACKTURN) {
-      papan.arr[brs][klm].push(global.FLATSTONE_BLACK);
-    }
-    else {
-      papan.arr[brs][klm].push(global.FLATSTONE_WHITE);
-    }
-    
-    // cek menang 
-    var trace = []; 
-    trace = [];  var flagKiri = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KIRI");
-    trace = [];  var flagKanan = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KANAN");
-    trace = [];  var flagAtas = nabrakTembok(papan.arr, brs, klm, giliran, trace, "ATAS");
-    trace = [];  var flagBawah = nabrakTembok(papan.arr, brs, klm, giliran, trace, "BAWAH");
+    if(((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE != 0) || 
+    ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE != 0) || 
+    (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE != 0) ||
+    (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE != 0)) {
+        papan.arr[brs][klm].push(selectedStone);
 
-    if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
-    else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
-    
-    gantiGiliran(); 
+      if (selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) {
+        global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
+      } else if (selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) {
+        global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
+      } else if (selectedStone === global.CAPSTONE_BLACK) {
+        global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
+      } else if (selectedStone === global.CAPSTONE_WHITE) {
+        global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
+      }
+      
+      // cek menang 
+      var trace = []; 
+      trace = [];  var flagKiri = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KIRI");
+      trace = [];  var flagKanan = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KANAN");
+      trace = [];  var flagAtas = nabrakTembok(papan.arr, brs, klm, giliran, trace, "ATAS");
+      trace = [];  var flagBawah = nabrakTembok(papan.arr, brs, klm, giliran, trace, "BAWAH");
+
+      if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
+      else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
+      
+      gantiGiliran(); 
+    }
   }
 
   return (
     <>
       <h4>Playtak</h4>
-      <h5>Giliran : { giliran }</h5>
+      <h5>Giliran : { giliran === 1 ? "BLACK" : "WHITE"}</h5>
       <input type='button' onClick={() => runAI() } value="Run AI" /><br /><br />
+      <div>
+        {jumMelangkah >= 2 && (
+          <>
+            <button onClick={() => selectStoneType(giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)}>Flatstone</button>
+            <button onClick={() => selectStoneType(giliran === global.BLACKTURN ? global.WALLSTONE_BLACK : global.WALLSTONE_WHITE)}>Wallstone</button>
+            <button onClick={() => selectStoneType(giliran === global.BLACKTURN ? global.CAPSTONE_BLACK : global.CAPSTONE_WHITE)}>Capstone</button>
+          </>
+        )}
+      </div>
       <table border='1'>
       {papan.arr.map((item, indexbar) => (
-          <tr>
+          <tr key={indexbar}>
           {
             item.map((node, indexkol) => (
-              <td>
+              <td key={indexkol}>
                 <div onClick={() => bukadiv(indexbar, indexkol)} className="card" style={{width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00FFFF', boxSizing: 'border-box', padding: '1px', margin: '1px'}} key={indexbar + indexkol}>
                   <table style={{width: '100%'}}>
                   {
@@ -285,23 +321,27 @@ function App() {
                         <tr style={{width: '100%'}}>
                           <td style={{width: '100%'}}>
                             { node == global.FLATSTONE_BLACK && 
-                              <div style={{width: '100%', height: '10px', color: 'white', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                              <div style={{width: '100%', height: '10px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
                               </div>
                             }
                             { node == global.FLATSTONE_WHITE && 
-                              <div style={{width: '100%', height: '10px', color: 'white', backgroundColor: 'red', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                              <div style={{width: '100%', height: '10px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
                               </div>
                             }
                             { node == global.WALLSTONE_BLACK && 
-                              <div style={{width: '10%', marginLeft: '45%', height: '30px', color: 'white', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                              <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
                               </div>
                             }
                             { node == global.WALLSTONE_WHITE && 
-                              <div style={{width: '10%', marginLeft: '45%', height: '30px', color: 'red', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                              <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
                               </div>
                             }
                             { node == global.CAPSTONE_BLACK && 
-                              <div style={{width: '20%', marginLeft: '40%', height: '20px', color: 'red', backgroundColor: 'black', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                              <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'black', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                              </div>
+                            }
+                            { node == global.CAPSTONE_WHITE && 
+                              <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'white', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
                               </div>
                             }
                           </td>
