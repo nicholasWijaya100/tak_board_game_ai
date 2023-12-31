@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 import global from './Global'
 import { Clsboard } from './Clsboard'
 
@@ -269,10 +272,10 @@ function App() {
       <input type='button' onClick={() => runAI() } value="Run AI" /><br /><br />
       <table border='1'>
       {papan.arr.map((item, indexbar) => (
-          <tr key={indexbar}>
+          <tr>
           {
             item.map((node, indexkol) => (
-              <td key={indexkol}>
+              <td>
                 <div onClick={() => bukadiv(indexbar, indexkol)} className="card" style={{width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00FFFF', boxSizing: 'border-box', padding: '1px', margin: '1px'}} key={indexbar + indexkol}>
                   <table style={{width: '100%'}}>
                   {
