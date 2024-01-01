@@ -24,6 +24,13 @@ function App() {
   var [jumMelangkah, setJumMelangkah] = useState(0);
   var [selectedStone, setSelectedStone] = useState(jumMelangkah === 1 ? (giliran === global.WHITETURN ? global.FLATSTONE_WHITE : global.FLATSTONE_BLACK) : global.FLATSTONE_BLACK);
   var [maxLevel, setMaxLevel] = useState(1);
+  var [brsAngkat, setBrsAngkat] = useState(-1);
+  var [klmAngkat, setKlmAngkat] = useState(-1);
+  var [lastBrs, setLastBrs] = useState(-1);
+  var [lastKlm, setLastKlm] = useState(-1);
+  var [brsDirection, setBrsDirection] = useState(-1);
+  var [klmDirection, setKlmDirection] = useState(-1);
+  var [stackAngkat, setStackAngkat] = useState([]);
 
   useEffect(() => {
   }, []);
@@ -261,35 +268,232 @@ function App() {
     }
   }
 
-  function bukadiv(brs, klm) {
-    if(((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE != 0) || 
-    ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE != 0) || 
-    (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE != 0) ||
-    (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE != 0)) {
-        papan.arr[brs][klm].push(selectedStone);
-
-      if (selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) {
-        global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
-      } else if (selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) {
-        global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
-      } else if (selectedStone === global.CAPSTONE_BLACK) {
-        global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
-      } else if (selectedStone === global.CAPSTONE_WHITE) {
-        global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
+  function validTaruh(parambrs, paramklm, paramgiliran) {
+    if (papan.arr[parambrs][paramklm].length > 0) {
+      let topStone = papan.arr[parambrs][paramklm][papan.arr[parambrs][paramklm].length - 1];
+      
+      // If the top stone is a capstone, no stone can be moved there
+      if ((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_BLACK || selectedStone === global.WALLSTONE_WHITE) 
+      && (topStone !== global.WALLSTONE_BLACK && topStone !== global.WALLSTONE_WHITE && topStone !== global.CAPSTONE_BLACK && topStone !== global.CAPSTONE_WHITE)) {
+        return true;
       }
-      
-      // cek menang 
-      var trace = []; 
-      trace = [];  var flagKiri = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KIRI");
-      trace = [];  var flagKanan = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KANAN");
-      trace = [];  var flagAtas = nabrakTembok(papan.arr, brs, klm, giliran, trace, "ATAS");
-      trace = [];  var flagBawah = nabrakTembok(papan.arr, brs, klm, giliran, trace, "BAWAH");
-
-      if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
-      else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
-      
-      gantiGiliran(); 
+  
+      // If the moving stone is not a capstone and the top stone is a wallstone, reject the move
+      else if (selectedStone === global.CAPSTONE_BLACK || selectedStone === global.CAPSTONE_WHITE) {
+        return true;
+      }
     }
+    else if(brsDirection == -1 && klmDirection == -1) {
+      if(parambrs == brsAngkat && paramklm == klmAngkat) { return true; }
+      else {
+        var selisihbrs = Math.abs(parambrs - brsAngkat);
+        var selisihklm = Math.abs(paramklm - klmAngkat); 
+        if((selisihbrs == 0 && selisihklm == 1) || (selisihbrs == 1 && selisihklm == 0)) 
+        { return true; }
+      }
+    }
+    else {
+      if(parambrs - lastBrs == brsDirection && paramklm - lastKlm == klmDirection)
+      { return true; }
+      else if(parambrs == lastBrs && paramklm == lastKlm) 
+      { return true; }
+    }
+
+    return false;
+  }
+
+  function bukadiv(brs, klm) {
+    // Check if the selected cell is empty
+    if (papan.arr[brs][klm].length === 0 && brsAngkat == -1) {
+      if(((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE != 0) || 
+        ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE != 0) || 
+        (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE != 0) ||
+        (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE != 0)) {
+            papan.arr[brs][klm].push(selectedStone);
+
+          if (selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) {
+            global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
+          } else if (selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) {
+            global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
+          } else if (selectedStone === global.CAPSTONE_BLACK) {
+            global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
+          } else if (selectedStone === global.CAPSTONE_WHITE) {
+            global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
+          }
+          
+          // cek menang 
+          var trace = []; 
+          trace = [];  var flagKiri = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KIRI");
+          trace = [];  var flagKanan = nabrakTembok(papan.arr, brs, klm, giliran, trace, "KANAN");
+          trace = [];  var flagAtas = nabrakTembok(papan.arr, brs, klm, giliran, trace, "ATAS");
+          trace = [];  var flagBawah = nabrakTembok(papan.arr, brs, klm, giliran, trace, "BAWAH");
+
+          if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
+          else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
+          
+          gantiGiliran(); 
+      }
+    } else {
+      if(brsAngkat == -1) {
+        var top = papan.arr[brs][klm].length - 1;
+        var topstack = papan.arr[brs][klm][top];
+        if (giliran == global.BLACKTURN && (topstack == global.FLATSTONE_BLACK || topstack == global.CAPSTONE_BLACK)) {
+            setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
+            papan.arr[brs][klm] = []; 
+        }
+        else if (giliran == global.WHITETURN && (topstack == global.FLATSTONE_WHITE || topstack == global.CAPSTONE_WHITE)) {
+          setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
+          papan.arr[brs][klm] = []; 
+      }  
+      }
+      else {
+        if(validTaruh(brs, klm, giliran) == true) {
+          papan.arr[brs][klm].push(stackAngkat[0]);
+          setStackAngkat(stackAngkat.filter((item, index) => index != 0));
+          if(stackAngkat.length == 1) {
+            setBrsAngkat(-1); setKlmAngkat(-1); setBrsDirection(-1); setKlmDirection(-1); setLastBrs(-1); setLastKlm(-1); 
+            gantiGiliran(); 
+          }
+          else {
+            if(brsDirection == -1 && klmDirection == -1) {
+              if(!(brs == brsAngkat && klm == klmAngkat)) {
+                setBrsDirection(brs - brsAngkat); 
+                setKlmDirection(klm - klmAngkat);  
+                setLastBrs(brs); 
+                setLastKlm(klm);                
+              }
+              else {
+                setLastBrs(brs); 
+                setLastKlm(klm);                
+              }  
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function sideBar() {
+    return <div className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00AAFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key='sidebar'>
+      <table style={{ width: '100%' }}>
+        {stackAngkat.slice().reverse().map((revnode, indexitem) => (
+          <>
+            {
+              <tr style={{ width: '100%' }}>
+                <td style={{ width: '100%' }}>
+                { revnode == global.FLATSTONE_BLACK && 
+                  <div style={{width: '100%', height: '10px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.FLATSTONE_WHITE && 
+                  <div style={{width: '100%', height: '10px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.WALLSTONE_BLACK && 
+                  <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.WALLSTONE_WHITE && 
+                  <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.CAPSTONE_BLACK && 
+                  <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'black', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.CAPSTONE_WHITE && 
+                  <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'white', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                </td>
+              </tr>
+            }
+          </>
+        ))}
+      </table>
+    </div>
+  }
+
+  function Kotak1(indexbar, indexkol, node) {
+    return <div onClick={() => bukadiv(indexbar, indexkol)} className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00AAFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
+      <table style={{ width: '100%' }}>
+        {node.slice().reverse().map((revnode, indexitem) => (
+          <>
+            {
+              <tr style={{ width: '100%' }}>
+                <td style={{ width: '100%' }}>
+                { revnode == global.FLATSTONE_BLACK && 
+                  <div style={{width: '100%', height: '10px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.FLATSTONE_WHITE && 
+                  <div style={{width: '100%', height: '10px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.WALLSTONE_BLACK && 
+                  <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.WALLSTONE_WHITE && 
+                  <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.CAPSTONE_BLACK && 
+                  <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'black', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.CAPSTONE_WHITE && 
+                  <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'white', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                </td>
+              </tr>
+            }
+          </>
+        ))}
+      </table>
+    </div>
+  }
+
+  function Kotak2(indexbar, indexkol, node) {
+    return <div onClick={() => bukadiv(indexbar, indexkol)} className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00FFFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
+      <table style={{ width: '100%' }}>
+        {node.slice().reverse().map((revnode, indexitem) => (
+          <>
+            {
+              <tr style={{ width: '100%' }}>
+                <td style={{ width: '100%' }}>  
+                { revnode == global.FLATSTONE_BLACK && 
+                  <div style={{width: '100%', height: '10px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.FLATSTONE_WHITE && 
+                  <div style={{width: '100%', height: '10px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.WALLSTONE_BLACK && 
+                  <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.WALLSTONE_WHITE && 
+                  <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.CAPSTONE_BLACK && 
+                  <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'black', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                { revnode == global.CAPSTONE_WHITE && 
+                  <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'white', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                  </div>
+                }
+                </td>
+              </tr>
+            }
+          </>
+        ))}
+      </table>
+    </div>
   }
 
   return (
@@ -306,57 +510,26 @@ function App() {
           </>
         )}
       </div>
-      <table border='1'>
-      {papan.arr.map((item, indexbar) => (
-          <tr key={indexbar}>
-          {
-            item.map((node, indexkol) => (
-              <td key={indexkol}>
-                <div onClick={() => bukadiv(indexbar, indexkol)} className="card" style={{width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00FFFF', boxSizing: 'border-box', padding: '1px', margin: '1px'}} key={indexbar + indexkol}>
-                  <table style={{width: '100%'}}>
-                  {
-                    node.slice().reverse().map((node, indexitem) => (
-                      <>
-                        {
-                        <tr style={{width: '100%'}}>
-                          <td style={{width: '100%'}}>
-                            { node == global.FLATSTONE_BLACK && 
-                              <div style={{width: '100%', height: '10px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
-                              </div>
-                            }
-                            { node == global.FLATSTONE_WHITE && 
-                              <div style={{width: '100%', height: '10px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
-                              </div>
-                            }
-                            { node == global.WALLSTONE_BLACK && 
-                              <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
-                              </div>
-                            }
-                            { node == global.WALLSTONE_WHITE && 
-                              <div style={{width: '10%', marginLeft: '45%', height: '30px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
-                              </div>
-                            }
-                            { node == global.CAPSTONE_BLACK && 
-                              <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'black', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
-                              </div>
-                            }
-                            { node == global.CAPSTONE_WHITE && 
-                              <div style={{width: '20%', marginLeft: '40%', height: '20px', backgroundColor: 'white', borderRadius: '10px', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
-                              </div>
-                            }
-                          </td>
-                        </tr>
-                        }
-                      </>
-                    ))
-                  }
-                  </table>
-                </div>
-              </td>
-            ))
-          }
-          </tr>
-      ))}
+      <td align='top'>{sideBar()}</td>
+      <table border='0'>
+        <tr>
+          <td>
+            <table border='1'>
+              {
+                papan.arr.map((item, indexbar) => (
+                  <tr key={indexbar}>
+                    {
+                      item.map((node, indexkol) => (
+                        <td key={indexkol}>
+                          {(indexbar == brsAngkat && indexkol == klmAngkat) ? Kotak1(indexbar, indexkol, node) : Kotak2(indexbar, indexkol, node)}
+                        </td>
+                      ))
+                    }
+                  </tr>
+                ))}
+            </table>
+          </td>
+        </tr>
       </table>
     </>
   )}
