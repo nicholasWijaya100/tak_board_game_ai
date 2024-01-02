@@ -346,7 +346,6 @@ function App() {
           if ((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE > 0) {
             global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
           } else if ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE > 0) {
-            console.log("DIKURANGICWC cvwev");
             global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
           } else if (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE > 0) {
             global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
@@ -392,16 +391,6 @@ function App() {
             papan.arr[brs][klm].push(stackAngkat[0]);
           } else {
             papan.arr[brs][klm].push(stackAngkat[0]);
-          }
-
-          if(stackAngkat[0] == global.WALLSTONE_BLACK || stackAngkat[0] == global.FLATSTONE_BLACK) {
-            global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1
-          } else if(stackAngkat[0] == global.WALLSTONE_WHITE || stackAngkat[0] == global.FLATSTONE_WHITE) {
-            global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1
-          } else if(stackAngkat[0] == global.CAPSTONE_BLACK) {
-            global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1
-          } else {
-            global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1
           }
 
           setStackAngkat(stackAngkat.filter((item, index) => index != 0));
