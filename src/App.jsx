@@ -305,7 +305,6 @@ function App() {
   function validTaruh(parambrs, paramklm, paramgiliran) {
     if (papan.arr[parambrs][paramklm].length > 0) {
       let topStone = papan.arr[parambrs][paramklm][papan.arr[parambrs][paramklm].length - 1];
-      console.log(stackAngkat[0]);
       
       if ((stackAngkat[0] === global.FLATSTONE_BLACK || stackAngkat[0] === global.FLATSTONE_WHITE || stackAngkat[0] === global.WALLSTONE_BLACK || stackAngkat[0] === global.WALLSTONE_WHITE) 
       && topStone !== global.WALLSTONE_BLACK && topStone !== global.WALLSTONE_WHITE && topStone !== global.CAPSTONE_BLACK && topStone !== global.CAPSTONE_WHITE) {
@@ -338,19 +337,20 @@ function App() {
   function bukadiv(brs, klm) {
     // Check if the selected cell is empty
     if (papan.arr[brs][klm].length === 0 && brsAngkat == -1) {
-      if(((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE != 0) || 
-        ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE != 0) || 
-        (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE != 0) ||
-        (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE != 0)) {
-            papan.arr[brs][klm].push(selectedStone);
+      if(((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE > 0) || 
+        ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE > 0) || 
+        (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE > 0) ||
+        (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE > 0)) {
+          papan.arr[brs][klm].push(selectedStone);
 
-          if (selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) {
+          if ((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE > 0) {
             global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
-          } else if (selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) {
+          } else if ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE > 0) {
+            console.log("DIKURANGICWC cvwev");
             global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
-          } else if (selectedStone === global.CAPSTONE_BLACK) {
+          } else if (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE > 0) {
             global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
-          } else if (selectedStone === global.CAPSTONE_WHITE) {
+          } else if (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE > 0) {
             global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
           }
           
@@ -368,11 +368,12 @@ function App() {
       }
     } else {
       if(brsAngkat == -1) {
+        console.log(2);
         var top = papan.arr[brs][klm].length - 1;
         var topstack = papan.arr[brs][klm][top];
         if (giliran == global.BLACKTURN && (topstack == global.FLATSTONE_BLACK || topstack == global.CAPSTONE_BLACK || topstack == global.WALLSTONE_BLACK)) {
-            setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
-            papan.arr[brs][klm] = []; 
+          setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
+          papan.arr[brs][klm] = []; 
         }
         else if (giliran == global.WHITETURN && (topstack == global.FLATSTONE_WHITE || topstack == global.CAPSTONE_WHITE || topstack == global.WALLSTONE_WHITE)) {
           setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
@@ -557,6 +558,9 @@ function App() {
     <>
       <h4>Playtak</h4>
       <h5>Giliran : { giliran === 1 ? "BLACK" : "WHITE"}</h5>
+      <h5>Jumlah Stone Di Tangan Player:</h5>
+      <div>flatstones: {global.NUMBER_OF_WHITE_FLATSTONE}</div>
+      <div>capstones: {global.NUMBER_OF_WHITE_CAPSTONE}</div>
       <input type='button' onClick={() => runAI() } value="Run AI" /><br /><br />
       <div>
         {jumMelangkah >= 2 && (
