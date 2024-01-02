@@ -140,35 +140,52 @@ function App() {
       status['kol'] = -1;
       status['koin'] = -1;
 
-      for(var i = 0; i < 5; i++)
-      {
-        for(var j = 0; j < 5; j++)
-        {
-          if(_papan.arr[i][j].length == 0)     // jika kotak tsb kondisi kosong
+      // probabilitas a
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          if (_papan.arr[i][j].length == 0)     // jika kotak tsb kondisi kosong 
           {
-            if (jumMelangkah >= 2)  {}
-            else  // jumMelangkah < 2 adlah @ player melangkah pertama kali (harus flat_stone)
-            {
+            // berikan pengecekan apakah flatstone+wallstone masih tersedia < 21 
+            var aw = 0; var ak = 0; 
+            if(_giliran == global.BLACKTURN) 
+            { 
+              if(jumMelangkah < 2)
+              { aw = global.FLATSTONE_BLACK; ak = global.FLATSTONE_BLACK; } 
+              else 
+              { aw = global.FLATSTONE_BLACK; ak = global.CAPSTONE_BLACK; 
+                if(global.NUMBER_OF_BLACK_CAPSTONE > 0) { ak = global.WALLSTONE_BLACK; }
+              }
+            }
+            else { 
+              if(jumMelangkah < 2)
+              { aw = global.FLATSTONE_WHITE; ak = global.FLATSTONE_WHITE; } 
+              else 
+              { aw = global.FLATSTONE_WHITE; ak = global.CAPSTONE_WHITE; 
+                if(global.NUMBER_OF_WHITE_CAPSTONE > 0) { ak = global.WALLSTONE_WHITE; }
+              }
+            }
+
+            for(var koinjalan = aw; koinjalan <= ak; koinjalan++) {
               var _arr = copyArray(_papan.arr);
-              var koin = ""; 
+              var koin = "";
               var _notgiliran = _giliran;
-              if(_giliran == global.BLACKTURN) {
+              if (_giliran == global.BLACKTURN) {
                 _notgiliran = global.WHITETURN;
-                koin = global.FLATSTONE_BLACK;
-                _arr[i][j].push(global.FLATSTONE_BLACK);
+                koin = koinjalan;
+                _arr[i][j].push(koinjalan);
               }
               else {
                 _notgiliran = global.BLACKTURN;
-                koin = global.FLATSTONE_WHITE;
-                _arr[i][j].push(global.FLATSTONE_WHITE);
+                koin = koinjalan;
+                _arr[i][j].push(koinjalan);
               }
 
-              var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result); 
-              if(weight < status['maxweight']) {
-                status['maxweight'] = weight; 
-                status['bar'] = i; 
-                status['kol'] = j; 
-                status['koin'] = koin; 
+              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              if (weight > status['maxweight']) {
+                status['maxweight'] = weight;
+                status['bar'] = i;
+                status['kol'] = j;
+                status['koin'] = koin;
               }
             }
           }
@@ -190,34 +207,51 @@ function App() {
       status['kol'] = -1;
       status['koin'] = -1;
 
-      for(var i = 0; i < 5; i++)
-      {
-        for(var j = 0; j < 5; j++)
-        {
-          if(_papan.arr[i][j].length == 0)     // jika kotak tsb kondisi kosong
+      // probabilitas a
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          if (_papan.arr[i][j].length == 0)     // jika kotak tsb kondisi kosong 
           {
-            if (jumMelangkah >= 2)  {}
-            else  // jumMelangkah < 2 adlah @ player melangkah pertama kali (harus flat_stone)
-            {
+            // berikan pengecekan apakah flatstone+wallstone masih tersedia < 21 
+            var aw = 0; var ak = 0; 
+            if(_giliran == global.BLACKTURN) 
+            { 
+              if(jumMelangkah < 2)
+              { aw = global.FLATSTONE_BLACK; ak = global.FLATSTONE_BLACK; } 
+              else 
+              { aw = global.FLATSTONE_BLACK; ak = global.CAPSTONE_BLACK; 
+                if(global.NUMBER_OF_BLACK_CAPSTONE > 0) { ak = global.WALLSTONE_BLACK; }
+              }
+            }
+            else { 
+              if(jumMelangkah < 2)
+              { aw = global.FLATSTONE_WHITE; ak = global.FLATSTONE_WHITE; } 
+              else 
+              { aw = global.FLATSTONE_WHITE; ak = global.CAPSTONE_WHITE; 
+                if(global.NUMBER_OF_WHITE_CAPSTONE > 0) { ak = global.WALLSTONE_WHITE; }
+              }
+            }
+
+            for(var koinjalan = aw; koinjalan <= ak; koinjalan++) {
               var _arr = copyArray(_papan.arr);
-              var koin = ""; 
+              var koin = "";
               var _notgiliran = _giliran;
-              if(_giliran == global.BLACKTURN) {
+              if (_giliran == global.BLACKTURN) {
                 _notgiliran = global.WHITETURN;
-                koin = global.FLATSTONE_BLACK;
-                _arr[i][j].push(global.FLATSTONE_BLACK);
+                koin = koinjalan;
+                _arr[i][j].push(koinjalan);
               }
               else {
                 _notgiliran = global.BLACKTURN;
-                koin = global.FLATSTONE_WHITE;
-                _arr[i][j].push(global.FLATSTONE_WHITE);
+                koin = koinjalan;
+                _arr[i][j].push(koinjalan);
               }
 
-              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result); 
-              if(weight > status['maxweight']) {
-                status['maxweight'] = weight; 
-                status['bar'] = i; 
-                status['kol'] = j; 
+              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              if (weight > status['maxweight']) {
+                status['maxweight'] = weight;
+                status['bar'] = i;
+                status['kol'] = j;
                 status['koin'] = koin;
               }
             }
@@ -271,15 +305,14 @@ function App() {
   function validTaruh(parambrs, paramklm, paramgiliran) {
     if (papan.arr[parambrs][paramklm].length > 0) {
       let topStone = papan.arr[parambrs][paramklm][papan.arr[parambrs][paramklm].length - 1];
+      console.log(stackAngkat[0]);
       
-      // If the top stone is a capstone, no stone can be moved there
-      if ((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_BLACK || selectedStone === global.WALLSTONE_WHITE) 
-      && (topStone !== global.WALLSTONE_BLACK && topStone !== global.WALLSTONE_WHITE && topStone !== global.CAPSTONE_BLACK && topStone !== global.CAPSTONE_WHITE)) {
+      if ((stackAngkat[0] === global.FLATSTONE_BLACK || stackAngkat[0] === global.FLATSTONE_WHITE || stackAngkat[0] === global.WALLSTONE_BLACK || stackAngkat[0] === global.WALLSTONE_WHITE) 
+      && topStone !== global.WALLSTONE_BLACK && topStone !== global.WALLSTONE_WHITE && topStone !== global.CAPSTONE_BLACK && topStone !== global.CAPSTONE_WHITE) {
         return true;
       }
   
-      // If the moving stone is not a capstone and the top stone is a wallstone, reject the move
-      else if (selectedStone === global.CAPSTONE_BLACK || selectedStone === global.CAPSTONE_WHITE) {
+      else if (stackAngkat[0] === global.CAPSTONE_BLACK || stackAngkat[0] === global.CAPSTONE_WHITE) {
         return true;
       }
     }
@@ -337,18 +370,39 @@ function App() {
       if(brsAngkat == -1) {
         var top = papan.arr[brs][klm].length - 1;
         var topstack = papan.arr[brs][klm][top];
-        if (giliran == global.BLACKTURN && (topstack == global.FLATSTONE_BLACK || topstack == global.CAPSTONE_BLACK)) {
+        if (giliran == global.BLACKTURN && (topstack == global.FLATSTONE_BLACK || topstack == global.CAPSTONE_BLACK || topstack == global.WALLSTONE_BLACK)) {
             setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
             papan.arr[brs][klm] = []; 
         }
-        else if (giliran == global.WHITETURN && (topstack == global.FLATSTONE_WHITE || topstack == global.CAPSTONE_WHITE)) {
+        else if (giliran == global.WHITETURN && (topstack == global.FLATSTONE_WHITE || topstack == global.CAPSTONE_WHITE || topstack == global.WALLSTONE_WHITE)) {
           setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
           papan.arr[brs][klm] = []; 
-      }  
+        }  
       }
       else {
         if(validTaruh(brs, klm, giliran) == true) {
-          papan.arr[brs][klm].push(stackAngkat[0]);
+          if(papan.arr[brs][klm].length > 0) {
+            var tp = papan.arr[brs][klm].length - 1;
+            if(papan.arr[brs][klm][tp] === global.WALLSTONE_BLACK) {
+              papan.arr[brs][klm][tp] = global.FLATSTONE_BLACK;
+            } else if(papan.arr[brs][klm][tp] === global.WALLSTONE_WHITE) {
+              papan.arr[brs][klm][tp] = global.FLATSTONE_WHITE;
+            }
+            papan.arr[brs][klm].push(stackAngkat[0]);
+          } else {
+            papan.arr[brs][klm].push(stackAngkat[0]);
+          }
+
+          if(stackAngkat[0] == global.WALLSTONE_BLACK || stackAngkat[0] == global.FLATSTONE_BLACK) {
+            global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1
+          } else if(stackAngkat[0] == global.WALLSTONE_WHITE || stackAngkat[0] == global.FLATSTONE_WHITE) {
+            global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1
+          } else if(stackAngkat[0] == global.CAPSTONE_BLACK) {
+            global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1
+          } else {
+            global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1
+          }
+
           setStackAngkat(stackAngkat.filter((item, index) => index != 0));
           if(stackAngkat.length == 1) {
             setBrsAngkat(-1); setKlmAngkat(-1); setBrsDirection(-1); setKlmDirection(-1); setLastBrs(-1); setLastKlm(-1); 
@@ -366,6 +420,9 @@ function App() {
                 setLastBrs(brs); 
                 setLastKlm(klm);                
               }  
+            } else {
+              setLastBrs(brs); 
+              setLastKlm(klm); 
             }
           }
         }
