@@ -48,6 +48,7 @@ function App() {
       for(var j = 0; j < 5; j++) {
         if(_papan.arr[i][j].length > 0) {
           var t = _papan.arr[i][j].length - 1; 
+          //kalau ga dikasih ini error
           if(i == 2 && j == 2) {
             weight = weight + 100;       
           }
@@ -397,14 +398,19 @@ function App() {
       
       if ((stackAngkat[0] === global.FLATSTONE_BLACK || stackAngkat[0] === global.FLATSTONE_WHITE || stackAngkat[0] === global.WALLSTONE_BLACK || stackAngkat[0] === global.WALLSTONE_WHITE) 
       && topStone !== global.WALLSTONE_BLACK && topStone !== global.WALLSTONE_WHITE && topStone !== global.CAPSTONE_BLACK && topStone !== global.CAPSTONE_WHITE) {
-        return true;
+        
       }
   
       else if (stackAngkat[0] === global.CAPSTONE_BLACK || stackAngkat[0] === global.CAPSTONE_WHITE) {
-        return true;
+        
+      }
+
+      else {
+        return false;
       }
     }
-    else if(brsDirection == -1 && klmDirection == -1) {
+    
+    if(brsDirection == -1 && klmDirection == -1) {
       if(parambrs == brsAngkat && paramklm == klmAngkat) { return true; }
       else {
         var selisihbrs = Math.abs(parambrs - brsAngkat);
