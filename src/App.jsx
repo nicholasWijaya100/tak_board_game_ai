@@ -20,6 +20,7 @@ function App() {
                               ])
                           );
 
+  var [tempPapan, setTempPapan] = useState(papan);
   var [giliran, setGiliran] = useState(global.WHITETURN);
   var [jumMelangkah, setJumMelangkah] = useState(0);
   var [selectedStone, setSelectedStone] = useState(jumMelangkah === 1 ? (giliran === global.WHITETURN ? global.FLATSTONE_WHITE : global.FLATSTONE_BLACK) : global.FLATSTONE_BLACK);
@@ -31,7 +32,8 @@ function App() {
   var [brsDirection, setBrsDirection] = useState(-1);
   var [klmDirection, setKlmDirection] = useState(-1);
   var [stackAngkat, setStackAngkat] = useState([]);
-
+  const [tempArr, setTempArr] = useState([]);
+  
   useEffect(() => {
   }, []);
 
@@ -41,19 +43,35 @@ function App() {
 
   function findWeight(_papan) {
     var weight = 0;   
+    
     for(var i = 0; i < 5; i++) {
       for(var j = 0; j < 5; j++) {
         if(_papan.arr[i][j].length > 0) {
           var t = _papan.arr[i][j].length - 1; 
+          if(i == 2 && j == 2) {
+            weight = weight + 100;       
+          }
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
-              weight = weight + sbe[i][j]; 
-            }    
+              weight = weight + 1; 
+            }
+            else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
+              weight = weight - 1; 
+            } 
+            else {
+              weight = weight + 0;
+            }
           }
           else {
-            if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
-              weight = weight + sbe[i][j]; 
-            }    
+            if(_papan.arr[i][j][t] <= 13) {
+              weight = weight - 1; 
+            }
+            else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
+              weight = weight + 1; 
+            } 
+            else {
+              weight = weight + 0;
+            }     
           }
         }
       }
@@ -127,6 +145,19 @@ function App() {
       }
       else { return false; }        
     }
+  }
+
+  function getChildren(stackAi, _giliran) {
+    var jum = 0; 
+    for(var i = 0; i < stackAi.length; i++) {
+      if (_giliran == global.BLACKTURN && stackAi[i] <= global.CAPSTONE_BLACK) {
+        jum+=1; 
+      }
+      else if (_giliran == global.WHITETURN && stackAi[i] > global.CAPSTONE_BLACK && stackAi[i] <= global.CAPSTONE_WHITE) {
+        jum+=1; 
+      }
+    }
+    return jum; 
   }
 
   function minimum(_level, _giliran, _papan, _result) {
@@ -258,7 +289,45 @@ function App() {
           }
         }
       }
+      
+      // probabilitas b
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          if (_papan.arr[i][j].length > 0)     // jika kotak tsb pasti ada isinya
+          {
+            var len = _papan.arr[i][j].length;
 
+            if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
+                (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE && 
+                                                 _papan.arr[i][j][len - 1] >  global.CAPSTONE_BLACK)) {
+              var _arr = copyArray(_papan.arr);
+
+              var stackAI = _papan.arr[i][j];
+
+              if(getChildren(stackAI, _giliran) > 1) {
+                var _notgiliran = _giliran;
+                if (_giliran == global.BLACKTURN) {
+                  _notgiliran = global.WHITETURN;
+  
+                  // ke atas
+                  if(i > 0) {
+                    
+                  }
+                }
+  
+                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                  status['koin'] = koin;
+                }  
+              }
+            }
+          }
+        }
+      }
+      
       _result['maxweight'] = status['maxweight']; 
       _result['bar'] = status['bar']; 
       _result['kol'] = status['kol']; 
@@ -282,23 +351,43 @@ function App() {
     else { setGiliran(global.BLACKTURN); }
   }
 
-  function gantiGiliran() {
-    setJumMelangkah(jumMelangkah + 1);
-    if(giliran == global.BLACKTURN) { 
-      setGiliran(global.WHITETURN); 
-      if(jumMelangkah < 1) {
-        setSelectedStone(global.FLATSTONE_BLACK);
-      } else {
-        setSelectedStone(global.FLATSTONE_WHITE);
-      }
+  function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+
+    for (let i = 0; i < a.length; i++) {
+        if (a[i].length !== b[i].length) return false;
+
+        for (let j = 0; j < a[i].length; j++) {
+            if (a[i][j].length !== b[i][j].length) return false;
+
+            for (let k = 0; k < a[i][j].length; k++) {
+                if (a[i][j][k] !== b[i][j][k]) return false;
+            }
+        }
     }
-    else { 
-      setGiliran(global.BLACKTURN); 
-      if(jumMelangkah < 1) {
-        setSelectedStone(global.FLATSTONE_WHITE);
-      } else {
-        setSelectedStone(global.FLATSTONE_BLACK);
+    return true;
+}
+
+
+  function gantiGiliran() {
+    if(!arraysEqual(tempArr, papan.arr)){
+      setJumMelangkah(jumMelangkah + 1);
+      if(giliran == global.BLACKTURN) { 
+        setGiliran(global.WHITETURN); 
+        if(jumMelangkah < 1) {
+          setSelectedStone(global.FLATSTONE_BLACK);
+        } else {
+          setSelectedStone(global.FLATSTONE_WHITE);
+        }
       }
+      else { 
+        setGiliran(global.BLACKTURN); 
+        if(jumMelangkah < 1) {
+          setSelectedStone(global.FLATSTONE_WHITE);
+        } else {
+          setSelectedStone(global.FLATSTONE_BLACK);
+        }
+      }  
     }
   }
 
@@ -341,6 +430,7 @@ function App() {
         ((selectedStone === global.FLATSTONE_WHITE || selectedStone === global.WALLSTONE_WHITE) && global.NUMBER_OF_WHITE_FLATSTONE > 0) || 
         (selectedStone === global.CAPSTONE_BLACK && global.NUMBER_OF_BLACK_CAPSTONE > 0) ||
         (selectedStone === global.CAPSTONE_WHITE && global.NUMBER_OF_WHITE_CAPSTONE > 0)) {
+          setTempArr(copyArray(papan.arr));
           papan.arr[brs][klm].push(selectedStone);
 
           if ((selectedStone === global.FLATSTONE_BLACK || selectedStone === global.WALLSTONE_BLACK) && global.NUMBER_OF_BLACK_FLATSTONE > 0) {
@@ -367,7 +457,7 @@ function App() {
       }
     } else {
       if(brsAngkat == -1) {
-        console.log(2);
+        setTempArr(copyArray(papan.arr));
         var top = papan.arr[brs][klm].length - 1;
         var topstack = papan.arr[brs][klm][top];
         if (giliran == global.BLACKTURN && (topstack == global.FLATSTONE_BLACK || topstack == global.CAPSTONE_BLACK || topstack == global.WALLSTONE_BLACK)) {
