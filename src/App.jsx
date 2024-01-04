@@ -460,13 +460,14 @@ function App() {
         setTempArr(copyArray(papan.arr));
         var top = papan.arr[brs][klm].length - 1;
         var topstack = papan.arr[brs][klm][top];
+        var stackLength = papan.arr[brs][klm].length <= 5 ? papan.arr[brs][klm].length : 5;
         if (giliran == global.BLACKTURN && (topstack == global.FLATSTONE_BLACK || topstack == global.CAPSTONE_BLACK || topstack == global.WALLSTONE_BLACK)) {
-          setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
-          papan.arr[brs][klm] = []; 
+          setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm].slice(-1 * stackLength));
+          papan.arr[brs][klm].splice(-1 * stackLength, stackLength); 
         }
         else if (giliran == global.WHITETURN && (topstack == global.FLATSTONE_WHITE || topstack == global.CAPSTONE_WHITE || topstack == global.WALLSTONE_WHITE)) {
-          setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm]);
-          papan.arr[brs][klm] = []; 
+          setBrsAngkat(brs); setKlmAngkat(klm); setBrsDirection(-1); setKlmDirection(-1); setStackAngkat(papan.arr[brs][klm].slice(-1 * stackLength));
+          papan.arr[brs][klm].splice(-1 * stackLength, stackLength); 
         }  
       }
       else {
