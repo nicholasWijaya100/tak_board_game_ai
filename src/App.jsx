@@ -42,22 +42,26 @@ function App() {
   }
 
   function findWeight(_papan) {
-    var weight = 0;   
+    var weight = 100;   
     
     for(var i = 0; i < 5; i++) {
       for(var j = 0; j < 5; j++) {
         if(_papan.arr[i][j].length > 0) {
           var t = _papan.arr[i][j].length - 1; 
-          //kalau ga dikasih ini error
-          if(i == 2 && j == 2) {
-            weight = weight + 100;       
-          }
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight + 1; 
+              //Jika capstone +2
+              if(_papan.arr[i][j][t] == 13) {
+                weight = weight + 2;
+              } 
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight - 1; 
+              //Jika capstone -2
+              if(_papan.arr[i][j][t] == 23) {
+                weight = weight - 2;
+              } 
             } 
             else {
               weight = weight + 0;
@@ -65,14 +69,63 @@ function App() {
           }
           else {
             if(_papan.arr[i][j][t] <= 13) {
-              weight = weight - 1; 
+              weight = weight - 1;
+              if(_papan.arr[i][j][t] == 13) {
+                weight = weight - 2;
+              } 
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight + 1; 
+              if(_papan.arr[i][j][t] == 23) {
+                weight = weight + 2;
+              } 
             } 
             else {
               weight = weight + 0;
             }     
+          }
+
+          var trace = []; 
+          trace = [];  var flagKiri = nabrakTembok(papan.arr, i, j, giliran, trace, "KIRI");
+          trace = [];  var flagKanan = nabrakTembok(papan.arr, i, j, giliran, trace, "KANAN");
+          trace = [];  var flagAtas = nabrakTembok(papan.arr, i, j, giliran, trace, "ATAS");
+          trace = [];  var flagBawah = nabrakTembok(papan.arr, i, j, giliran, trace, "BAWAH");
+
+          trace = [];  var flagKiriLawan = nabrakTembok(papan.arr, i, j, !giliran, trace, "KIRI");
+          trace = [];  var flagKananLawan = nabrakTembok(papan.arr, i, j, !giliran, trace, "KANAN");
+          trace = [];  var flagAtasLawan = nabrakTembok(papan.arr, i, j, !giliran, trace, "ATAS");
+          trace = [];  var flagBawahLawan = nabrakTembok(papan.arr, i, j, !giliran, trace, "BAWAH");
+
+          if(flagKiri) {
+            weight = weight + 20;
+          }
+          if(flagKanan) {
+            weight = weight + 20;
+          }
+          if(flagAtas) {
+            weight = weight + 20;
+          }
+          if(flagBawah) {
+            weight = weight + 20;
+          }
+          if((flagKiri && flagKanan) || (flagAtas && flagBawah)) {
+            weight = weight + 10000;
+          }
+
+          if(flagKiriLawan) {
+            weight = weight - 20;
+          }
+          if(flagKananLawan) {
+            weight = weight - 20;
+          }
+          if(flagAtasLawan) {
+            weight = weight - 20;
+          }
+          if(flagBawahLawan) {
+            weight = weight - 20;
+          }
+          if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
+            weight = weight - 10000;
           }
         }
       }
@@ -348,8 +401,18 @@ function App() {
 
     papan.arr[result['bar']][result['kol']].push(result['koin']);
 
-    if(giliran == global.BLACKTURN) { setGiliran(global.WHITETURN); }
-    else { setGiliran(global.BLACKTURN); }
+    // cek menang 
+    var trace = []; 
+    trace = [];  var flagKiri = nabrakTembok(papan.arr, result['bar'], result['kol'], giliran, trace, "KIRI");
+    trace = [];  var flagKanan = nabrakTembok(papan.arr, result['bar'], result['kol'], giliran, trace, "KANAN");
+    trace = [];  var flagAtas = nabrakTembok(papan.arr, result['bar'], result['kol'], giliran, trace, "ATAS");
+    trace = [];  var flagBawah = nabrakTembok(papan.arr, result['bar'], result['kol'], giliran, trace, "BAWAH");
+
+    if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
+    else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
+
+    if(giliran == global.BLACKTURN) { gantiGiliran() }
+    else { gantiGiliran() }
   }
 
   function arraysEqual(a, b) {
