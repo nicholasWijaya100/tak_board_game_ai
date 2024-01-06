@@ -42,7 +42,7 @@ function App() {
   }
 
   function findWeight(_papan) {
-    var weight = 30000;   
+    var weight = 0;   
     
     for(var i = 0; i < 5; i++) {
       for(var j = 0; j < 5; j++) {
@@ -51,82 +51,37 @@ function App() {
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight + 1; 
-              //Jika capstone +2
-              if(_papan.arr[i][j][t] == 13) {
-                weight = weight + 2;
-              } 
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight - 1; 
-              //Jika capstone -2
-              if(_papan.arr[i][j][t] == 23) {
-                weight = weight - 2;
-              } 
             } 
           }
           else {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight - 1;
-              if(_papan.arr[i][j][t] == 13) {
-                weight = weight - 2;
-              } 
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight + 1; 
-              if(_papan.arr[i][j][t] == 23) {
-                weight = weight + 2;
-              } 
             }  
           }
+ 
+          var traceFlagKiri = [];  var flagKiri = nabrakTembok(_papan.arr, i, j, giliran, traceFlagKiri, "KIRI");
+          var traceFlagKanan = [];  var flagKanan = nabrakTembok(_papan.arr, i, j, giliran, traceFlagKanan, "KANAN");
+          var traceFlagAtas = [];  var flagAtas = nabrakTembok(_papan.arr, i, j, giliran, traceFlagAtas, "ATAS");
+          var traceFlagBawah = [];  var flagBawah = nabrakTembok(_papan.arr, i, j, giliran, traceFlagBawah, "BAWAH");
 
-          var trace = []; 
-          trace = [];  var flagKiri = nabrakTembok(_papan.arr, i, j, giliran, trace, "KIRI");
-          trace = [];  var flagKanan = nabrakTembok(_papan.arr, i, j, giliran, trace, "KANAN");
-          trace = [];  var flagAtas = nabrakTembok(_papan.arr, i, j, giliran, trace, "ATAS");
-          trace = [];  var flagBawah = nabrakTembok(_papan.arr, i, j, giliran, trace, "BAWAH");
+          var traceFlagKiriLawan = [];  var flagKiriLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagKiriLawan, "KIRI");
+          var traceFlagKananLawan = [];  var flagKananLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagKananLawan, "KANAN");
+          var traceFlagAtasLawan = [];  var flagAtasLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagAtasLawan, "ATAS");
+          var traceFlagBawahLawan = [];  var flagBawahLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
 
-
-          if(_papan.giliran == global.BLACKTURN) {
-            _papan.arr[i][j].push(global.FLATSTONE_WHITE);
-          } else {
-            _papan.arr[i][j].push(global.FLATSTONE_BLACK);
-          }
-          trace = [];  var flagKiriLawan = nabrakTembok(_papan.arr, i, j, !giliran, trace, "KIRI");
-          trace = [];  var flagKananLawan = nabrakTembok(_papan.arr, i, j, !giliran, trace, "KANAN");
-          trace = [];  var flagAtasLawan = nabrakTembok(_papan.arr, i, j, !giliran, trace, "ATAS");
-          trace = [];  var flagBawahLawan = nabrakTembok(_papan.arr, i, j, !giliran, trace, "BAWAH");
-          _papan.arr[i][j].pop();
-
-          if(flagKiri) {
-            weight = weight + 20;
-          }
-          if(flagKanan) {
-            weight = weight + 20;
-          }
-          if(flagAtas) {
-            weight = weight + 20;
-          }
-          if(flagBawah) {
-            weight = weight + 20;
-          }
           if((flagKiri && flagKanan) || (flagAtas && flagBawah)) {
             weight = weight + 10000;
           }
 
-          if(flagKiriLawan) {
-            weight = weight - 20;
-          }
-          if(flagKananLawan) {
-            weight = weight - 20;
-          }
-          if(flagAtasLawan) {
-            weight = weight - 20;
-          }
-          if(flagBawahLawan) {
-            weight = weight - 20;
-          }
           if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
-            weight = weight - 20000;
+            weight = weight - 10000;
+            
           }
         }
       }
@@ -241,7 +196,7 @@ function App() {
       }
 
       var status = []; 
-      status['maxweight'] = 9999;
+      status['maxweight'] = 700000;
       status['bar'] = -1;
       status['kol'] = -1;
       status['koin'] = -1;
@@ -307,7 +262,7 @@ function App() {
       }
 
       var status = []; 
-      status['maxweight'] = 0;
+      status['maxweight'] = -700000;
       status['bar'] = -1;
       status['kol'] = -1;
       status['koin'] = -1;
