@@ -285,16 +285,22 @@ function App() {
 
       if (_giliran == global.BLACKTURN) {
         _notgiliran = global.WHITETURN;
-        if (global.NUMBER_OF_BLACK_FLATSTONE > 0) { pilihanKoin.push(global.FLATSTONE_BLACK); }
-        if (jumMelangkah >= 2) {
+        if(jumMelangkah < 2) {
+          pilihanKoin.push(global.FLATSTONE_WHITE);
+        }
+        else if (jumMelangkah >= 2) {
+          if (global.NUMBER_OF_BLACK_FLATSTONE > 0) { pilihanKoin.push(global.FLATSTONE_BLACK); }
           if (global.NUMBER_OF_BLACK_FLATSTONE > 0) { pilihanKoin.push(global.WALLSTONE_BLACK); }
           if (global.NUMBER_OF_BLACK_CAPSTONE == 1) { pilihanKoin.push(global.CAPSTONE_BLACK); }
         }
       }
       else {
         _notgiliran = global.BLACKTURN;
-        if (global.NUMBER_OF_WHITE_FLATSTONE > 0) { pilihanKoin.push(global.FLATSTONE_WHITE); }
-        if (jumMelangkah >= 2) {
+        if(jumMelangkah < 2) {
+          pilihanKoin.push(global.FLATSTONE_BLACK);
+        }
+        else if (jumMelangkah >= 2) {
+          if (global.NUMBER_OF_WHITE_FLATSTONE > 0) { pilihanKoin.push(global.FLATSTONE_WHITE); }
           if (global.NUMBER_OF_WHITE_FLATSTONE > 0) { pilihanKoin.push(global.WALLSTONE_WHITE); }
           if (global.NUMBER_OF_WHITE_CAPSTONE == 1) { pilihanKoin.push(global.CAPSTONE_WHITE); }
         }
@@ -388,6 +394,15 @@ function App() {
     console.log("result = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol']); 
 
     papan.arr[result['bar']][result['kol']].push(result['koin']);
+    if(result['koin'] == global.FLATSTONE_BLACK || result['koin'] == global.WALLSTONE_BLACK) {
+      global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
+    } else if(result['koin'] == global.CAPSTONE_BLACK || result['koin'] == global.CAPSTONE_BLACK) {
+      global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
+    } else if(result['koin'] == global.FLATSTONE_WHITE || result['koin'] == global.WALLSTONE_WHITE) {
+      global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
+    } else {
+      global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
+    }
 
     // cek menang 
     var trace = []; 
