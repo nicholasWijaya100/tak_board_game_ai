@@ -24,7 +24,7 @@ function App() {
   var [giliran, setGiliran] = useState(global.WHITETURN);
   var [jumMelangkah, setJumMelangkah] = useState(0);
   var [selectedStone, setSelectedStone] = useState(jumMelangkah === 1 ? (giliran === global.WHITETURN ? global.FLATSTONE_WHITE : global.FLATSTONE_BLACK) : global.FLATSTONE_BLACK);
-  var [maxLevel, setMaxLevel] = useState(3);
+  var [maxLevel, setMaxLevel] = useState(5);
   var [brsAngkat, setBrsAngkat] = useState(-1);
   var [klmAngkat, setKlmAngkat] = useState(-1);
   var [lastBrs, setLastBrs] = useState(-1);
@@ -64,26 +64,45 @@ function App() {
               weight = weight + 1; 
             }  
           }
- 
-          var traceFlagKiri = [];  var flagKiri = nabrakTembok(_papan.arr, i, j, giliran, traceFlagKiri, "KIRI");
-          var traceFlagKanan = [];  var flagKanan = nabrakTembok(_papan.arr, i, j, giliran, traceFlagKanan, "KANAN");
-          var traceFlagAtas = [];  var flagAtas = nabrakTembok(_papan.arr, i, j, giliran, traceFlagAtas, "ATAS");
-          var traceFlagBawah = [];  var flagBawah = nabrakTembok(_papan.arr, i, j, giliran, traceFlagBawah, "BAWAH");
-
-          var traceFlagKiriLawan = [];  var flagKiriLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagKiriLawan, "KIRI");
-          var traceFlagKananLawan = [];  var flagKananLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagKananLawan, "KANAN");
-          var traceFlagAtasLawan = [];  var flagAtasLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagAtasLawan, "ATAS");
-          var traceFlagBawahLawan = [];  var flagBawahLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
-
-          if((flagKiri && flagKanan) || (flagAtas && flagBawah)) {
-            weight = weight + 10000;
-          }
-
-          if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
-            weight = weight - 10000;
-            
-          }
         }
+      }
+    }
+
+    for(var i = 0; i < 5; i++) {
+      var breakTrue = false;
+      for(var j = 0; j < 5; j++) {
+        var traceFlagKiri = [];  var flagKiri = nabrakTembok(_papan.arr, i, j, giliran, traceFlagKiri, "KIRI");
+        var traceFlagKanan = [];  var flagKanan = nabrakTembok(_papan.arr, i, j, giliran, traceFlagKanan, "KANAN");
+        var traceFlagAtas = [];  var flagAtas = nabrakTembok(_papan.arr, i, j, giliran, traceFlagAtas, "ATAS");
+        var traceFlagBawah = [];  var flagBawah = nabrakTembok(_papan.arr, i, j, giliran, traceFlagBawah, "BAWAH");
+
+        if((flagKiri && flagKanan) || (flagAtas && flagBawah)) {
+          weight = weight + 2000;
+          breakTrue = true;
+          break;
+        }
+      }
+      if(breakTrue) {
+        break;
+      }
+    }
+
+    for(var i = 0; i < 5; i++) {
+      var breakTrue = false;
+      for(var j = 0; j < 5; j++) {
+        var traceFlagKiriLawan = [];  var flagKiriLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagKiriLawan, "KIRI");
+        var traceFlagKananLawan = [];  var flagKananLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagKananLawan, "KANAN");
+        var traceFlagAtasLawan = [];  var flagAtasLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagAtasLawan, "ATAS");
+        var traceFlagBawahLawan = [];  var flagBawahLawan = nabrakTembok(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
+
+        if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
+          weight = weight - 1000;
+          breakTrue = true;
+          break;
+        }
+      }
+      if(breakTrue) {
+        break;
       }
     }
     return weight; 
