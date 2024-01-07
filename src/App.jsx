@@ -711,19 +711,45 @@ function App() {
           <div className="mt-4">
             {jumMelangkah >= 2 && (
               <div className="flex items-center space-x-4">
-                {['flatstone', 'wallstone', 'capstone'].map((type) => (
-                  <label key={type} className="flex items-center space-x-2">
-                    <input 
-                      type="radio" 
-                      name="stoneType" 
-                      value={type}
-                      onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)} 
-                      checked={selectedStone === (giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)}
-                      className="form-radio text-blue-600"
-                    />
-                    <span className="text-gray-700 capitalize">{type}</span>
-                  </label>
-                ))}
+                 {jumMelangkah >= 2 && (
+                  <>
+                    <label>
+                      <input 
+                        type="radio" 
+                        name="stoneType" 
+                        value="flatstone"
+                        onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)} 
+                        checked={selectedStone === (giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)}
+                        className="form-radio text-blue-600"
+                      />
+                      <span className="text-gray-700 capitalize">Flatstone</span>
+                    </label>
+
+                    <label>
+                      <input 
+                        type="radio" 
+                        name="stoneType" 
+                        value="wallstone"
+                        onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.WALLSTONE_BLACK : global.WALLSTONE_WHITE)} 
+                        checked={selectedStone === (giliran === global.BLACKTURN ? global.WALLSTONE_BLACK : global.WALLSTONE_WHITE)}
+                        className="form-radio text-blue-600"
+                      />
+                      <span className="text-gray-700 capitalize">Wallstone</span>
+                    </label>
+
+                    <label>
+                      <input 
+                        type="radio" 
+                        name="stoneType" 
+                        value="capstone"
+                        onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.CAPSTONE_BLACK : global.CAPSTONE_WHITE)} 
+                        checked={selectedStone === (giliran === global.BLACKTURN ? global.CAPSTONE_BLACK : global.CAPSTONE_WHITE)}
+                        className="form-radio text-blue-600"
+                      />
+                      <span className="text-gray-700 capitalize">Capstone</span>
+                    </label>
+                  </>
+                )}
               </div>
             )}
           </div>
