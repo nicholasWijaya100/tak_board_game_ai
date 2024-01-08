@@ -5,11 +5,11 @@ import { Clsboard } from './Clsboard'
 function App() {
   var [papan, setPapan] = useState(
                               new Clsboard(global.BLACKTURN, [
-                                [[11, 13], [21], [11], [21], [11]],
-                                [[21], [11], [21], [11], [21]],
-                                [[11], [21], [11], [21], [11]],
-                                [[21], [11], [21], [11], [21]],
-                                [[11], [21], [11], [21], [11]],
+                                [[], [], [], [], []],
+                                [[], [], [], [], []],
+                                [[], [], [], [], []],
+                                [[], [], [], [], []],
+                                [[], [], [], [], []],
                               ])
                           );
 
@@ -170,21 +170,8 @@ function App() {
     }
   }
 
-  function getChildren(stackAi, _giliran) {
-    var jum = 0; 
-    for(var i = 0; i < stackAi.length; i++) {
-      if (_giliran == global.BLACKTURN && stackAi[i] <= global.CAPSTONE_BLACK) {
-        jum+=1; 
-      }
-      else if (_giliran == global.WHITETURN && stackAi[i] > global.CAPSTONE_BLACK && stackAi[i] <= global.CAPSTONE_WHITE) {
-        jum+=1; 
-      }
-    }
-    return jum; 
-  }
-
-  function tryMoving(vb, vk, vgiliran, varr, db, dk) {
-    var len = varr[vb][vk].length; 
+  function tryMoving(vb, vk, vgiliran, varr, db, dk, vmode) {
+    var len = varr[vb][vk].length;
     var moveFlag = 0;
     var stackAI = [];
     if ((vgiliran == global.BLACKTURN && varr[vb][vk][len - 1] <= global.CAPSTONE_BLACK) ||
@@ -194,14 +181,16 @@ function App() {
       for (var z = 0; z < varr[vb][vk].length; z++) { stackAI.push(varr[vb][vk][z]); }
       _arr[vb][vk] = [];
 
-      if (vb > 0) {
+      if ((db < 0 && vb > 0) || (db > 0 && vb < 4) || (dk < 0 && vk > 0) || (dk > 0 && vk < 4)) {
         var moveBrs = vb; var moveKlm = vk;
+        if(vmode != 0) { moveBrs+=db; moveKlm+=dk; }
         while (moveFlag == 0) {
           var enough = false;
           do {
             if (stackAI.length == 0) { enough = true; }
             else {
               var palingBawah = stackAI[0];
+              console.log("cek = " + moveBrs + "," + moveKlm + " => " + vb + "," + vk + "=> " + db + "," + dk + "-" + vmode);
               _arr[moveBrs][moveKlm].push(palingBawah);
               if (vgiliran == global.BLACKTURN && palingBawah <= global.CAPSTONE_BLACK) { enough = true; }
               else if (vgiliran == global.WHITETURN && palingBawah > global.CAPSTONE_BLACK && palingBawah <= global.CAPSTONE_WHITE) { enough = true; }
@@ -210,15 +199,13 @@ function App() {
           }
           while (enough == false);
           moveBrs += db; moveKlm += dk;
-          //console.log("movebrs ditambah = " + moveBrs); 
-          //console.log("moveklm ditambah = " + moveKlm); 
           if (!(moveBrs >= 0 && moveBrs < 5 && moveKlm >= 0 && moveKlm < 5)) {
             if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) { moveFlag = -1; }
-            else { 
-              moveFlag = 1; 
-              while(stackAI.length > 0) {
-                var palingBawah = stackAI[0]; 
-                if(db != 0) {
+            else {
+              moveFlag = 1;
+              while (stackAI.length > 0) {
+                var palingBawah = stackAI[0];
+                if (db != 0) {
                   _arr[moveBrs + (db * -1)][moveKlm].push(palingBawah);
                 }
                 else {
@@ -228,44 +215,45 @@ function App() {
               }
             }
           }
-          else if (stackAI.length == 0) { 
-            if ((db != 0 && moveBrs == vb) || (dk != 0 && moveKlm == vk)) { moveFlag = -1; }
+          else if (stackAI.length == 0) {
+            console.log("habis = movebrs = " + moveBrs + " - vb = " + vb);
+            if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) { moveFlag = -1; }
             else { moveFlag = 1; }
           }
           else {
-            console.log("masuk sini " + moveBrs + "***" + moveKlm); 
-            var len2 = _arr[moveBrs][moveKlm].length; 
-            if(len2 != 0) {
-              console.log("masuk sini lagi"); 
-              var topval = _arr[moveBrs][moveKlm][len2 - 1]; 
-              if(vgiliran == global.BLACKTURN && topval != global.FLATSTONE_BLACK) {  // tidak boleh naik 
-                console.log("tidak boleh naik"); 
-                if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) { 
-                  moveFlag = -2; 
-                  console.log(db + "***" + dk); 
-                  console.log(moveBrs + "***" + moveKlm); 
+            console.log("masuk sini " + moveBrs + "***" + moveKlm);
+            var len2 = _arr[moveBrs][moveKlm].length;
+            if (len2 != 0) {
+              console.log("masuk sini lagi");
+              var topval = _arr[moveBrs][moveKlm][len2 - 1];
+              if (vgiliran == global.BLACKTURN && topval != global.FLATSTONE_BLACK) {  // tidak boleh naik 
+                console.log("tidak boleh naik");
+                if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) {
+                  moveFlag = -2;
+                  console.log(db + "***" + dk);
+                  console.log(moveBrs + "***" + moveKlm);
                 }
                 else {
-                  console.log("kesini"); 
-                  moveFlag = 1; 
-                  moveBrs+=(db * -1); moveKlm+=(dk * -1);
-                  console.log("masuk sini " + moveBrs + "***" + moveKlm); 
-                  while(stackAI.length > 0) {
-                    var palingBawah = stackAI[0]; 
+                  console.log("kesini");
+                  moveFlag = 1;
+                  moveBrs += (db * -1); moveKlm += (dk * -1);
+                  console.log("masuk sini " + moveBrs + "***" + moveKlm);
+                  while (stackAI.length > 0) {
+                    var palingBawah = stackAI[0];
                     _arr[moveBrs][moveKlm].push(palingBawah);
                     stackAI.splice(0, 1);
                   }
                 }
-              }  
+              }
             }
           }
         }
       }
     }
-    if(moveFlag == 1) {
-      for(var i = 0; i < 5; i++) {
-        for(var j = 0; j < 5; j++) {
-          varr[i][j] = _arr[i][j]; 
+    if (moveFlag == 1) {
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          varr[i][j] = _arr[i][j];
         }
       }
     }
@@ -459,59 +447,45 @@ function App() {
         }
       }
 
-      // probabilitas 2
-      for (var i = 0; i < 2; i++) {
-        for (var j = 0; j < 2; j++) {
+      //Gerak AI ke-1 --> menggerakan stone
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
           var len = _papan.arr[i][j].length;
-          if (len > 0) 
+          if (len > 0)     // jika kotak tsb ada isinya
           {
             if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
               (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE &&
                 _papan.arr[i][j][len - 1] > global.CAPSTONE_BLACK)) {
 
-              // Gerak ke atas
-              var _arr = copyArray(papan.arr);
-              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, -1);
-              if (moveFlag == 1) {
-                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
-                }
-              }
+              for (var arah = 0; arah < 2; arah += 1) {
+                var db = -1; var dk = -1; 
+                if(arah == 0) { db = -1; dk = 0; }      // atas
+                else if(arah == 1) { db = 0; dk = 1; }  // kanan
+                else if(arah == 2) { db = 1; dk = 0; }  // bawah
+                else if(arah == 3) { db = 0; dk = -1; } // kiri
 
-              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, 1);
-              if (moveFlag == 1) {
-                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
-                }
-              }
-
-              var moveFlag = tryMoving(i, j, _giliran, _arr, -1, 0);
-              if (moveFlag == 1) {
-                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
-                }
-              }
-
-              var moveFlag = tryMoving(i, j, _giliran, _arr, 1, 0);
-              if (moveFlag == 1) {
-                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
+                // kemungkinan bisa start dari kotak dia dan bisa dari kotak disampingnya
+                var value = 0;
+                for (var k = 0; k < 2; k++) {
+                  var _arr = copyArray(papan.arr);
+                  var moveFlag = tryMoving(i, j, _giliran, _arr, db, dk, value);
+                  if (moveFlag == 1) {
+                    console.log("masuk 2 = " + i + "," + j);
+                    // _arr yg isinya adalah papan yg sudah berubah sesuai disribusi koin
+                    var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                    console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
+                    if (weight > status['maxweight']) {
+                      status['maxweight'] = weight;
+                      status['bar'] = i;
+                      status['kol'] = j;
+                      if(arah == 0) { status['koin'] = "moveup"; }
+                      else if(arah == 1) { status['koin'] = "moveright"; }
+                      else if(arah == 2) { status['koin'] = "movedown"; }
+                      else if(arah == 3) { status['koin'] = "moveleft"; }
+                      status['value'] = -1;
+                    }
+                  }
+                  value = -1;
                 }
               }
             }
@@ -530,39 +504,57 @@ function App() {
 
   function runAI() {
     var level = 1
-    var result = []; 
+    var result = [];
     result['maxweight'] = 0;
     result['bar'] = -1;
     result['kol'] = -1;
     result['koin'] = -1;
+    result['value'] = 99;
     maksimum(level, giliran, papan, result);
-    console.log("result = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol']); 
+    console.log("posisi AI ambil = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol'] + " ---- " + result['koin']);
 
-    papan.arr[result['bar']][result['kol']].push(result['koin']);
-    if(result['koin'] == global.FLATSTONE_BLACK || result['koin'] == global.WALLSTONE_BLACK) {
-      global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
-    } else if(result['koin'] == global.CAPSTONE_BLACK || result['koin'] == global.CAPSTONE_BLACK) {
-      global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
-    } else if(result['koin'] == global.FLATSTONE_WHITE || result['koin'] == global.WALLSTONE_WHITE) {
-      global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
-    } else if(result['koin'] == global.CAPSTONE_WHITE || result['koin'] == global.CAPSTONE_WHITE) {
-      global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
-    } else {
-      console.log(result['koin'])
+    if (result['koin'] == "moveup") {
+      console.log("posisi AI ambil = " + result['value']);
+      console.log("ubah moveup");
+      var _arr = copyArray(papan.arr);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
+      papan.arr = _arr;
+    }
+    else if (result['koin'] == "moveright") {
+      console.log("posisi AI ambil = " + result['value']);
+      console.log("ubah moveright");
+      var _arr = copyArray(papan.arr);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, 0, 1, result['value']);
+      papan.arr = _arr;
+    }
+    else if (result['koin'] == "movedown") {
+      console.log("posisi AI ambil = " + result['value']);
+      console.log("ubah movedown");
+      var _arr = copyArray(papan.arr);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, 1, 0, result['value']);
+      papan.arr = _arr;
+    }
+    else if (result['koin'] == "moveleft") {
+      console.log("posisi AI ambil = " + result['value']);
+      console.log("ubah moveleft");
+      var _arr = copyArray(papan.arr);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
+      papan.arr = _arr;
+    }
+    else {
+      papan.arr[result['bar']][result['kol']].push(result['koin']);
+      if(result['koin'] == global.WALLSTONE_BLACK || result['koin'] == global.FLATSTONE_BLACK) {
+        global.NUMBER_OF_BLACK_FLATSTONE = global.NUMBER_OF_BLACK_FLATSTONE - 1;
+      } else if(result['koin'] == global.WALLSTONE_WHITE || result['koin'] == global.FLATSTONE_WHITE) {
+        global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
+      } else if(result['koin'] == global.CAPSTONE_BLACK) {
+        global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
+      } else if(result['koin'] == global.CAPSTONE_WHITE) {
+        global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
+      }
     }
 
-    // cek menang 
-    var trace = []; 
-    trace = [];  var flagKiri = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "KIRI");
-    trace = [];  var flagKanan = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "KANAN");
-    trace = [];  var flagAtas = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "ATAS");
-    trace = [];  var flagBawah = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "BAWAH");
-
-    if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
-    else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
-
-    if(giliran == global.BLACKTURN) { gantiGiliran() }
-    else { gantiGiliran() }
+    gantiGiliran();
   }
 
   function arraysEqual(a, b) {
@@ -587,7 +579,7 @@ function App() {
     if(!arraysEqual(tempArr, papan.arr)){
       setJumMelangkah(jumMelangkah + 1);
       if(giliran == global.BLACKTURN) { 
-        setGiliran(global.WHITETURN); 
+        setGiliran(global.WHITETURN);
         if(jumMelangkah < 1) {
           setSelectedStone(global.FLATSTONE_BLACK);
         } else {
@@ -706,7 +698,7 @@ function App() {
           setStackAngkat(stackAngkat.filter((item, index) => index != 0));
           if(stackAngkat.length == 1) {
             setBrsAngkat(-1); setKlmAngkat(-1); setBrsDirection(-1); setKlmDirection(-1); setLastBrs(-1); setLastKlm(-1); 
-            gantiGiliran(); 
+            gantiGiliran();
           }
           else {
             if(brsDirection == -1 && klmDirection == -1) {
