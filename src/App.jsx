@@ -70,7 +70,7 @@ function App() {
         var traceFlagBawah = [];  var flagBawah = checkIfConnectedWithBorder(_papan.arr, i, j, giliran, traceFlagBawah, "BAWAH");
 
         if((flagKiri && flagKanan) || (flagAtas && flagBawah)) {
-          weight = weight + 1500;
+          weight = weight + 9000;
           breakTrue = true;
           break;
         }
@@ -89,7 +89,7 @@ function App() {
         var traceFlagBawahLawan = [];  var flagBawahLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
 
         if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
-          weight = weight - 1000;
+          weight = weight - 10000;
           breakTrue = true;
           break;
         }
@@ -262,6 +262,7 @@ function App() {
 
   function minimum(_level, _giliran, _papan, _result) {
     if(_level > maxLevel) {
+      console.log(_papan);
       return findWeight(_papan);
     }
     else {
@@ -316,50 +317,7 @@ function App() {
       }
 
       //Gerak AI ke-2 --> menggerakan stone
-      for (var i = 0; i < 5; i++) {
-        for (var j = 0; j < 5; j++) {
-          var len = _papan.arr[i][j].length;
-          if (len > 0)     // jika kotak tsb ada isinya
-          {
-            if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
-              (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE &&
-                _papan.arr[i][j][len - 1] > global.CAPSTONE_BLACK)) {
-
-              for (var arah = 0; arah < 2; arah += 1) {
-                var db = -1; var dk = -1; 
-                if(arah == 0) { db = -1; dk = 0; }      // atas
-                else if(arah == 1) { db = 0; dk = 1; }  // kanan
-                else if(arah == 2) { db = 1; dk = 0; }  // bawah
-                else if(arah == 3) { db = 0; dk = -1; } // kiri
-
-                // kemungkinan bisa start dari kotak dia dan bisa dari kotak disampingnya
-                var value = 0;
-                for (var k = 0; k < 2; k++) {
-                  var _arr = copyArray(papan.arr);
-                  var moveFlag = tryMoving(i, j, _giliran, _arr, db, dk, value);
-                  if (moveFlag == 1) {
-                    console.log("masuk 2 = " + i + "," + j);
-                    // _arr yg isinya adalah papan yg sudah berubah sesuai disribusi koin
-                    var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                    console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
-                    if (weight > status['maxweight']) {
-                      status['maxweight'] = weight;
-                      status['bar'] = i;
-                      status['kol'] = j;
-                      if(arah == 0) { status['koin'] = "moveup"; }
-                      else if(arah == 1) { status['koin'] = "moveright"; }
-                      else if(arah == 2) { status['koin'] = "movedown"; }
-                      else if(arah == 3) { status['koin'] = "moveleft"; }
-                      status['value'] = -1;
-                    }
-                  }
-                  value = -1;
-                }
-              }
-            }
-          }
-        }
-      }
+      
 
       _result['maxweight'] = status['maxweight'];
       _result['bar'] = status['bar'];
@@ -534,6 +492,16 @@ function App() {
         global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
       }
     }
+
+    // cek menang 
+    var trace = []; 
+    trace = [];  var flagKiri = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "KIRI");
+    trace = [];  var flagKanan = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "KANAN");
+    trace = [];  var flagAtas = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "ATAS");
+    trace = [];  var flagBawah = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "BAWAH");
+
+    if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
+    else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
 
     gantiGiliran();
   }
