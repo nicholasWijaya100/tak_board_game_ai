@@ -315,64 +315,45 @@ function App() {
         }
       }
 
-      //Gerak AI ke-2 --> menggerakkan stone
+      //Gerak AI ke-2 --> menggerakan stone
       for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
-          if (_papan.arr[i][j].length > 0) 
+          var len = _papan.arr[i][j].length;
+          if (len > 0)     // jika kotak tsb ada isinya
           {
-            var len = _papan.arr[i][j].length;
             if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
-                (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE && 
-                                                 _papan.arr[i][j][len - 1] >  global.CAPSTONE_BLACK)) {
-              //Gerak ke atas
-              var _arr = copyArray(_papan.arr);
-              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, -1);
-              if(moveFlag == 1) {
-                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
-                }
-              }
+              (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE &&
+                _papan.arr[i][j][len - 1] > global.CAPSTONE_BLACK)) {
 
-              //Gerak ke bawah
-              var _arr = copyArray(_papan.arr);
-              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, 1);
-              if(moveFlag == 1) {
-                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
-                }
-              }
+              for (var arah = 0; arah < 2; arah += 1) {
+                var db = -1; var dk = -1; 
+                if(arah == 0) { db = -1; dk = 0; }      // atas
+                else if(arah == 1) { db = 0; dk = 1; }  // kanan
+                else if(arah == 2) { db = 1; dk = 0; }  // bawah
+                else if(arah == 3) { db = 0; dk = -1; } // kiri
 
-              //Gerak ke kiri
-              var _arr = copyArray(_papan.arr);
-              var moveFlag = tryMoving(i, j, _giliran, _arr, -1, 0);
-              if(moveFlag == 1) {
-                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
-                }
-              }
-
-              //Gerak ke kanan
-              var _arr = copyArray(_papan.arr);
-              var moveFlag = tryMoving(i, j, _giliran, _arr, 1, 0);
-              if(moveFlag == 1) {
-                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                
-                if (weight > status['maxweight']) {
-                  status['maxweight'] = weight;
-                  status['bar'] = i;
-                  status['kol'] = j;
+                // kemungkinan bisa start dari kotak dia dan bisa dari kotak disampingnya
+                var value = 0;
+                for (var k = 0; k < 2; k++) {
+                  var _arr = copyArray(papan.arr);
+                  var moveFlag = tryMoving(i, j, _giliran, _arr, db, dk, value);
+                  if (moveFlag == 1) {
+                    console.log("masuk 2 = " + i + "," + j);
+                    // _arr yg isinya adalah papan yg sudah berubah sesuai disribusi koin
+                    var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                    console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
+                    if (weight > status['maxweight']) {
+                      status['maxweight'] = weight;
+                      status['bar'] = i;
+                      status['kol'] = j;
+                      if(arah == 0) { status['koin'] = "moveup"; }
+                      else if(arah == 1) { status['koin'] = "moveright"; }
+                      else if(arah == 2) { status['koin'] = "movedown"; }
+                      else if(arah == 3) { status['koin'] = "moveleft"; }
+                      status['value'] = -1;
+                    }
+                  }
+                  value = -1;
                 }
               }
             }
@@ -447,7 +428,7 @@ function App() {
         }
       }
 
-      //Gerak AI ke-1 --> menggerakan stone
+      //Gerak AI ke-2 --> menggerakan stone
       for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
           var len = _papan.arr[i][j].length;
