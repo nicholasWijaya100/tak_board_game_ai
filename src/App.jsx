@@ -5,11 +5,11 @@ import { Clsboard } from './Clsboard'
 function App() {
   var [papan, setPapan] = useState(
                               new Clsboard(global.BLACKTURN, [
-                                [[], [], [], [], []],
-                                [[], [], [], [], []],
-                                [[], [], [], [], []],
-                                [[], [], [], [], []],
-                                [[], [], [], [], []],
+                                [[11, 13], [21], [11], [21], [11]],
+                                [[21], [11], [21], [11], [21]],
+                                [[11], [21], [11], [21], [11]],
+                                [[21], [11], [21], [11], [21]],
+                                [[11], [21], [11], [21], [11]],
                               ])
                           );
 
@@ -183,6 +183,95 @@ function App() {
     return jum; 
   }
 
+  function tryMoving(vb, vk, vgiliran, varr, db, dk) {
+    var len = varr[vb][vk].length; 
+    var moveFlag = 0;
+    var stackAI = [];
+    if ((vgiliran == global.BLACKTURN && varr[vb][vk][len - 1] <= global.CAPSTONE_BLACK) ||
+      (vgiliran == global.WHITETURN && varr[vb][vk][len - 1] <= global.CAPSTONE_WHITE &&
+        varr[vb][vk][len - 1] > global.CAPSTONE_BLACK)) {
+      var _arr = copyArray(varr);
+      for (var z = 0; z < varr[vb][vk].length; z++) { stackAI.push(varr[vb][vk][z]); }
+      _arr[vb][vk] = [];
+
+      if (vb > 0) {
+        var moveBrs = vb; var moveKlm = vk;
+        while (moveFlag == 0) {
+          var enough = false;
+          do {
+            if (stackAI.length == 0) { enough = true; }
+            else {
+              var palingBawah = stackAI[0];
+              _arr[moveBrs][moveKlm].push(palingBawah);
+              if (vgiliran == global.BLACKTURN && palingBawah <= global.CAPSTONE_BLACK) { enough = true; }
+              else if (vgiliran == global.WHITETURN && palingBawah > global.CAPSTONE_BLACK && palingBawah <= global.CAPSTONE_WHITE) { enough = true; }
+              stackAI.splice(0, 1);
+            }
+          }
+          while (enough == false);
+          moveBrs += db; moveKlm += dk;
+          //console.log("movebrs ditambah = " + moveBrs); 
+          //console.log("moveklm ditambah = " + moveKlm); 
+          if (!(moveBrs >= 0 && moveBrs < 5 && moveKlm >= 0 && moveKlm < 5)) {
+            if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) { moveFlag = -1; }
+            else { 
+              moveFlag = 1; 
+              while(stackAI.length > 0) {
+                var palingBawah = stackAI[0]; 
+                if(db != 0) {
+                  _arr[moveBrs + (db * -1)][moveKlm].push(palingBawah);
+                }
+                else {
+                  _arr[moveBrs][moveKlm + (dk * -1)].push(palingBawah);
+                }
+                stackAI.splice(0, 1);
+              }
+            }
+          }
+          else if (stackAI.length == 0) { 
+            if ((db != 0 && moveBrs == vb) || (dk != 0 && moveKlm == vk)) { moveFlag = -1; }
+            else { moveFlag = 1; }
+          }
+          else {
+            console.log("masuk sini " + moveBrs + "***" + moveKlm); 
+            var len2 = _arr[moveBrs][moveKlm].length; 
+            if(len2 != 0) {
+              console.log("masuk sini lagi"); 
+              var topval = _arr[moveBrs][moveKlm][len2 - 1]; 
+              if(vgiliran == global.BLACKTURN && topval != global.FLATSTONE_BLACK) {  // tidak boleh naik 
+                console.log("tidak boleh naik"); 
+                if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) { 
+                  moveFlag = -2; 
+                  console.log(db + "***" + dk); 
+                  console.log(moveBrs + "***" + moveKlm); 
+                }
+                else {
+                  console.log("kesini"); 
+                  moveFlag = 1; 
+                  moveBrs+=(db * -1); moveKlm+=(dk * -1);
+                  console.log("masuk sini " + moveBrs + "***" + moveKlm); 
+                  while(stackAI.length > 0) {
+                    var palingBawah = stackAI[0]; 
+                    _arr[moveBrs][moveKlm].push(palingBawah);
+                    stackAI.splice(0, 1);
+                  }
+                }
+              }  
+            }
+          }
+        }
+      }
+    }
+    if(moveFlag == 1) {
+      for(var i = 0; i < 5; i++) {
+        for(var j = 0; j < 5; j++) {
+          varr[i][j] = _arr[i][j]; 
+        }
+      }
+    }
+    return moveFlag;
+  }
+
   function minimum(_level, _giliran, _papan, _result) {
     if(_level > maxLevel) {
       return findWeight(_papan);
@@ -237,6 +326,72 @@ function App() {
           }
         }
       }
+
+      //Gerak AI ke-2 --> menggerakkan stone
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          if (_papan.arr[i][j].length > 0) 
+          {
+            var len = _papan.arr[i][j].length;
+            if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
+                (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE && 
+                                                 _papan.arr[i][j][len - 1] >  global.CAPSTONE_BLACK)) {
+              //Gerak ke atas
+              var _arr = copyArray(_papan.arr);
+              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, -1);
+              if(moveFlag == 1) {
+                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
+              }
+
+              //Gerak ke bawah
+              var _arr = copyArray(_papan.arr);
+              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, 1);
+              if(moveFlag == 1) {
+                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
+              }
+
+              //Gerak ke kiri
+              var _arr = copyArray(_papan.arr);
+              var moveFlag = tryMoving(i, j, _giliran, _arr, -1, 0);
+              if(moveFlag == 1) {
+                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
+              }
+
+              //Gerak ke kanan
+              var _arr = copyArray(_papan.arr);
+              var moveFlag = tryMoving(i, j, _giliran, _arr, 1, 0);
+              if(moveFlag == 1) {
+                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
+              }
+            }
+          }
+        }
+      }
+
       _result['maxweight'] = status['maxweight'];
       _result['bar'] = status['bar'];
       _result['kol'] = status['kol'];
@@ -304,50 +459,60 @@ function App() {
         }
       }
 
-      //Gerak AI ke-2 --> menggerakkan stone
-      for (var i = 0; i < 5; i++) {
-        for (var j = 0; j < 5; j++) {
-          if (_papan.arr[i][j].length > 0)     // jika kotak tsb pasti ada isinya
+      // probabilitas 2
+      for (var i = 0; i < 2; i++) {
+        for (var j = 0; j < 2; j++) {
+          var len = _papan.arr[i][j].length;
+          if (len > 0) 
           {
-            var len = _papan.arr[i][j].length;
-
             if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
-                (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE && 
-                                                 _papan.arr[i][j][len - 1] >  global.CAPSTONE_BLACK)) {
-              var _arr = copyArray(_papan.arr);
+              (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE &&
+                _papan.arr[i][j][len - 1] > global.CAPSTONE_BLACK)) {
 
-              var stackAI = _papan.arr[i][j];
-
-              if(getChildren(stackAI, _giliran) > 1) {
-                var _notgiliran = _giliran;
-                if (_giliran == global.BLACKTURN) {
-                  _notgiliran = global.WHITETURN;
-  
-                  //Move ke atas
-                  if(i > 0) {
-                    
-                  }
-                  //Move ke bawah
-                  if(i < 4) {
-
-                  }
-                  //Move ke kiri
-                  if(j > 0) {
-                    
-                  }
-                  //Move ke kanan
-                  if(j < 4) {
-                    
-                  }
-                }
-  
+              // Gerak ke atas
+              var _arr = copyArray(papan.arr);
+              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, -1);
+              if (moveFlag == 1) {
                 var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
                 if (weight > status['maxweight']) {
                   status['maxweight'] = weight;
                   status['bar'] = i;
                   status['kol'] = j;
-                  status['koin'] = koin;
-                }  
+                }
+              }
+
+              var moveFlag = tryMoving(i, j, _giliran, _arr, 0, 1);
+              if (moveFlag == 1) {
+                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
+              }
+
+              var moveFlag = tryMoving(i, j, _giliran, _arr, -1, 0);
+              if (moveFlag == 1) {
+                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
+              }
+
+              var moveFlag = tryMoving(i, j, _giliran, _arr, 1, 0);
+              if (moveFlag == 1) {
+                var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
+                if (weight > status['maxweight']) {
+                  status['maxweight'] = weight;
+                  status['bar'] = i;
+                  status['kol'] = j;
+                }
               }
             }
           }
@@ -380,8 +545,10 @@ function App() {
       global.NUMBER_OF_BLACK_CAPSTONE = global.NUMBER_OF_BLACK_CAPSTONE - 1;
     } else if(result['koin'] == global.FLATSTONE_WHITE || result['koin'] == global.WALLSTONE_WHITE) {
       global.NUMBER_OF_WHITE_FLATSTONE = global.NUMBER_OF_WHITE_FLATSTONE - 1;
-    } else {
+    } else if(result['koin'] == global.CAPSTONE_WHITE || result['koin'] == global.CAPSTONE_WHITE) {
       global.NUMBER_OF_WHITE_CAPSTONE = global.NUMBER_OF_WHITE_CAPSTONE - 1;
+    } else {
+      console.log(result['koin'])
     }
 
     // cek menang 
@@ -606,7 +773,7 @@ function App() {
 
   function CellNormal(indexbar, indexkol, node) {
     return <div onClick={() => playerAction(indexbar, indexkol)} 
-          className='card w-25 h-20 rounded-sm bg-blue-500 box-border p-0.5 m-0.5' 
+          className='card w-25 h-20 rounded-sm bg-green-700 box-border p-0.5 m-0.5' 
           key={indexbar + indexkol}>
       <table className='w-full'>
         {node.slice().reverse().map((revnode, indexitem) => (
@@ -638,7 +805,7 @@ function App() {
   }
 
   function CellSelectedStack(indexbar, indexkol, node) {
-    return <div onClick={() => playerAction(indexbar, indexkol)} className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00FFFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
+    return <div onClick={() => playerAction(indexbar, indexkol)} className='card bg-green-300' style={{ width: '100px', height: '80px', borderRadius: '2px', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
       <table style={{ width: '100%' }}>
         {node.slice().reverse().map((revnode, indexitem) => (
           <>
