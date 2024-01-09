@@ -89,7 +89,7 @@ function App() {
         var traceFlagBawahLawan = [];  var flagBawahLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
 
         if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
-          weight = weight - 10000;
+          weight = weight - 8000;
           breakTrue = true;
           break;
         }
@@ -317,52 +317,6 @@ function App() {
           }
         }
       }
-
-      //Gerak AI ke-2 --> menggerakan stone
-      for (var i = 0; i < 5; i++) {
-        for (var j = 0; j < 5; j++) {
-          var len = _papan.arr[i][j].length;
-          if (len > 0)     // jika kotak tsb ada isinya
-          {
-            if ((_giliran == global.BLACKTURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_BLACK) ||
-              (_giliran == global.WHITETURN && _papan.arr[i][j][len - 1] <= global.CAPSTONE_WHITE &&
-                _papan.arr[i][j][len - 1] > global.CAPSTONE_BLACK)) {
-
-              for (var arah = 0; arah < 4; arah += 1) {
-                var db = -1; var dk = -1; 
-                if(arah == 0) { db = -1; dk = 0; }      // atas
-                else if(arah == 1) { db = 0; dk = 1; }  // kanan
-                else if(arah == 2) { db = 1; dk = 0; }  // bawah
-                else if(arah == 3) { db = 0; dk = -1; } // kiri
-
-                // kemungkinan bisa start dari kotak dia dan bisa dari kotak disampingnya
-                var value = 0;
-                for (var k = 0; k < 2; k++) {
-                  var _arr = copyArray(_papan.arr);
-                  var moveFlag = tryMoving(i, j, _giliran, _arr, db, dk, value);
-                  if (moveFlag == 1) {
-                    console.log("masuk 2 = " + i + "," + j);
-                    // _arr yg isinya adalah papan yg sudah berubah sesuai disribusi koin
-                    var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                    console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
-                    if (weight > status['maxweight']) {
-                      status['maxweight'] = weight;
-                      status['bar'] = i;
-                      status['kol'] = j;
-                      if(arah == 0) { status['koin'] = "moveup"; }
-                      else if(arah == 1) { status['koin'] = "moveright"; }
-                      else if(arah == 2) { status['koin'] = "movedown"; }
-                      else if(arah == 3) { status['koin'] = "moveleft"; }
-                      status['value'] = -1;
-                    }
-                  }
-                  value = -1;
-                }
-              }
-            }
-          }
-        }
-      }
       
 
       _result['maxweight'] = status['maxweight'];
@@ -580,6 +534,8 @@ function App() {
         } else {
           setSelectedStone(global.FLATSTONE_WHITE);
         }
+
+
       }
       else { 
         setGiliran(global.BLACKTURN); 
@@ -758,7 +714,7 @@ function App() {
     </div>
   }
 
-  function CellNormal(indexbar, indexkol, node) {
+  function CellSelectedStack(indexbar, indexkol, node) {
     return <div onClick={() => playerAction(indexbar, indexkol)} 
           className='card w-25 h-20 rounded-sm bg-green-700 box-border p-0.5 m-0.5' 
           key={indexbar + indexkol}>
@@ -791,9 +747,9 @@ function App() {
     </div>
   }
 
-  function CellSelectedStack(indexbar, indexkol, node) {
-    return <div onClick={() => playerAction(indexbar, indexkol)} className='card bg-green-300' style={{ width: '100px', height: '80px', borderRadius: '2px', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
-      <table style={{ width: '100%' }}>
+  function CellNormal(indexbar, indexkol, node) {
+    return <div onClick={() => playerAction(indexbar, indexkol)} className="card bg-[url('/tile.jpg')]" style={{ width: '100px', height: '80px', borderRadius: '2px', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
+      <table className='w-full'>
         {node.slice().reverse().map((revnode, indexitem) => (
           <>
             {
@@ -856,12 +812,15 @@ function App() {
                 Capstones: {global.NUMBER_OF_BLACK_CAPSTONE}
             </div>
           </div>
-          <input 
-              type='button' 
-              onClick={() => runAI() }
-              value="Run AI" 
-              className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition duration-300" 
-          />
+          <div className='flex flex-wrap w-full'>
+            <input 
+                type='button' 
+                onClick={() => runAI() }
+                value="Run AI" 
+                className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition duration-300" 
+            />
+            <div className='ml-32 border-1'>{showStackInHand()}</div>
+          </div>
           <div className="mt-4">
             {jumMelangkah >= 2 && (
               <div className="flex items-center space-x-4">
@@ -908,20 +867,20 @@ function App() {
             )}
           </div>
         </div>
-        <table className="border-0 ml-[-3rem] mb-10">
+        <table className="border-0 mb-10">
           <tbody>
             {papan.arr.map((item, indexbar) => (
               <tr key={indexbar}>
                 {indexbar == 0 ? (
-                  <td className="border">{showStackInHand()}</td>
+                  <td></td>
                 ) : (
                   <td></td>
                 )}
                 {item.map((node, indexkol) => (
                   <td key={indexkol} className="border">
                     {(indexbar == brsAngkat && indexkol == klmAngkat)
-                      ? CellNormal(indexbar, indexkol, node)
-                      : CellSelectedStack(indexbar, indexkol, node)}
+                      ? CellSelectedStack(indexbar, indexkol, node)
+                      : CellNormal(indexbar, indexkol, node)}
                   </td>
                 ))}
               </tr>
