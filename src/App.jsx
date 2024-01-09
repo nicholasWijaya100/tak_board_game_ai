@@ -26,6 +26,7 @@ function App() {
   var [klmDirection, setKlmDirection] = useState(-1);
   var [stackAngkat, setStackAngkat] = useState([]);
   const [tempArr, setTempArr] = useState([]);
+  const [refresh, setRefresh] = useState(1);
   
   useEffect(() => {
   }, []);
@@ -89,7 +90,7 @@ function App() {
         var traceFlagBawahLawan = [];  var flagBawahLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
 
         if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
-          weight = weight - 8000;
+          weight = weight - 10000;
           breakTrue = true;
           break;
         }
@@ -260,7 +261,7 @@ function App() {
     return moveFlag;
   }
 
-  function minimum(_level, _giliran, _papan, _result) {
+  function minimum(_level, _giliran, _papan, _result, _alpha, _beta) {
     if(_level > maxLevel) {
       if(findWeight(_papan) < -100) {
         console.log(_papan);
@@ -289,7 +290,7 @@ function App() {
       }
 
       var status = []; 
-      status['maxweight'] = 700000;
+      status['maxweight'] = Infinity;
       status['bar'] = -1;
       status['kol'] = -1;
       status['koin'] = -1;
@@ -302,7 +303,7 @@ function App() {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
 
               console.log("level " + _level + " -> after maksimum = " + i + ", " + j + " = " + weight); 
 
@@ -311,6 +312,11 @@ function App() {
                 status['bar'] = i;
                 status['kol'] = j;
                 status['koin'] = pilihanKoin[k];
+              }
+              _beta = Math.min(_beta, status["maxweight"]);
+              if(_beta <= _alpha) {
+                console.log('prune beta 1');
+                break;
               }
               _arr[i][j].pop();
             }
@@ -328,7 +334,7 @@ function App() {
     }
   }
 
-  function maksimum(_level, _giliran, _papan, _result) {
+  function maksimum(_level, _giliran, _papan, _result, _alpha, _beta) {
     if(_level <= maxLevel) {
       var pilihanKoin = [];
       var _notgiliran = _giliran;
@@ -357,7 +363,7 @@ function App() {
       }
 
       var status = []; 
-      status['maxweight'] = -700000;
+      status['maxweight'] = -Infinity;
       status['bar'] = -1;
       status['kol'] = -1;
       status['koin'] = -1;
@@ -370,7 +376,7 @@ function App() {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
 
               console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight); 
 
@@ -380,6 +386,11 @@ function App() {
                 status['kol'] = j;
                 status['koin'] = pilihanKoin[k];
               }
+              _alpha = Math.max(_alpha, status["maxweight"])
+              if(_alpha >= _beta){
+                console.log('prune alpha 1');
+                break;
+              };
               _arr[i][j].pop();
             }
           }
@@ -411,7 +422,7 @@ function App() {
                   if (moveFlag == 1) {
                     console.log("masuk 2 = " + i + "," + j);
                     // _arr yg isinya adalah papan yg sudah berubah sesuai disribusi koin
-                    var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                    var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
                     console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
                     if (weight > status['maxweight']) {
                       status['maxweight'] = weight;
@@ -421,7 +432,13 @@ function App() {
                       else if(arah == 1) { status['koin'] = "moveright"; }
                       else if(arah == 2) { status['koin'] = "movedown"; }
                       else if(arah == 3) { status['koin'] = "moveleft"; }
-                      status['value'] = -1;
+                      status['value'] = value;
+                    }
+                    _alpha = Math.max(_alpha, status["maxweight"])
+                    if(_alpha >= _beta) 
+                    {
+                      console.log('prune alpha 2');
+                      break;
                     }
                   }
                   value = -1;
@@ -441,7 +458,7 @@ function App() {
     }
   }
 
-  function runAI() {
+  function runAI(_giliran) {
     var level = 1
     var result = [];
     result['maxweight'] = 0;
@@ -449,35 +466,35 @@ function App() {
     result['kol'] = -1;
     result['koin'] = -1;
     result['value'] = 99;
-    maksimum(level, giliran, papan, result);
+    maksimum(level, _giliran, papan, result, -Infinity, Infinity);
     console.log("posisi AI ambil = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol'] + " ---- " + result['koin']);
 
     if (result['koin'] == "moveup") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah moveup");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], _giliran, _arr, -1, 0, result['value']);
       papan.arr = _arr;
     }
     else if (result['koin'] == "moveright") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah moveright");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], giliran, _arr, 0, 1, result['value']);
+      tryMoving(result['bar'], result['kol'], _giliran, _arr, 0, 1, result['value']);
       papan.arr = _arr;
     }
     else if (result['koin'] == "movedown") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah movedown");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], giliran, _arr, 1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], _giliran, _arr, 1, 0, result['value']);
       papan.arr = _arr;
     }
     else if (result['koin'] == "moveleft") {
       console.log("posisi AI ambil = " + result['value']);
-      console.log("ubah moveleft");
+      console.log("ubah moveleft"); 
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], _giliran, _arr, -1, 0, result['value']);
       papan.arr = _arr;
     }
     else {
@@ -502,8 +519,6 @@ function App() {
 
     if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
     else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
-
-    gantiGiliran();
   }
 
   function arraysEqual(a, b) {
@@ -616,6 +631,14 @@ function App() {
           else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
           
           gantiGiliran(); 
+          setTimeout(function() {
+            runAI(global.BLACKTURN);
+            if(refresh == 1) {
+              setRefresh(2);
+            } else {
+              setRefresh(1);
+            }
+          }, 2000);
       }
     } else {
       if(brsAngkat == -1) {
@@ -650,6 +673,14 @@ function App() {
           if(stackAngkat.length == 1) {
             setBrsAngkat(-1); setKlmAngkat(-1); setBrsDirection(-1); setKlmDirection(-1); setLastBrs(-1); setLastKlm(-1); 
             gantiGiliran();
+            setTimeout(function() {
+              runAI(global.BLACKTURN);
+              if(refresh == 1) {
+                setRefresh(2);
+              } else {
+                setRefresh(1);
+              }
+            }, 2000);
           }
           else {
             if(brsDirection == -1 && klmDirection == -1) {
@@ -813,13 +844,7 @@ function App() {
             </div>
           </div>
           <div className='flex flex-wrap w-full'>
-            <input 
-                type='button' 
-                onClick={() => runAI() }
-                value="Run AI" 
-                className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition duration-300" 
-            />
-            <div className='ml-32 border-1'>{showStackInHand()}</div>
+            <div className='ml-2 border-1'>{showStackInHand()}</div>
           </div>
           <div className="mt-4">
             {jumMelangkah >= 2 && (
