@@ -25,6 +25,7 @@ function App() {
   var [brsDirection, setBrsDirection] = useState(-1);
   var [klmDirection, setKlmDirection] = useState(-1);
   var [stackAngkat, setStackAngkat] = useState([]);
+  var [selectedStack, setSelectedStack] = useState([]);
   const [tempArr, setTempArr] = useState([]);
   const [refresh, setRefresh] = useState(1);
   
@@ -778,14 +779,14 @@ function App() {
     </div>
   }
 
-  function CellNormal(indexbar, indexkol, node) {
-    return <div onClick={() => playerAction(indexbar, indexkol)} className="card bg-[url('/tile.jpg')]" style={{ width: '100px', height: '80px', borderRadius: '2px', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
-      <table className='w-full'>
-        {node.slice().reverse().map((revnode, indexitem) => (
+  function showCurrentStack() {
+    return <div className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00AAFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key='stackInHand'>
+      <table style={{ width: '100%' }}>
+        {selectedStack.slice().reverse().map((revnode, indexitem) => (
           <>
             {
               <tr style={{ width: '100%' }}>
-                <td style={{ width: '100%' }}>  
+                <td style={{ width: '100%' }}>
                 { revnode == global.FLATSTONE_BLACK && 
                   <div style={{width: '100%', height: '10px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
                   </div>
@@ -819,6 +820,59 @@ function App() {
     </div>
   }
 
+  function setHoveredCell(brs, klm){
+    var stackLength = papan.arr[brs][klm].length <= 5 ? papan.arr[brs][klm].length : 5;
+    setSelectedStack(papan.arr[brs][klm].slice(-1 * stackLength));
+  }
+
+  function CellNormal(indexbar, indexkol, node) {
+    return <div onClick={() => 
+                          playerAction(indexbar, indexkol)
+                        } 
+                        onMouseEnter={() => setHoveredCell(indexbar, indexkol)}
+                        onMouseLeave={() => setSelectedStack([])}
+                        className="card bg-[url('/tile.jpg')]" style={{ width: '100px', height: '80px', borderRadius: '2px', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key={indexbar + indexkol}>
+      <table className='w-full'>
+        {node.slice().reverse().map((revnode, indexitem) => (
+          <>
+            {
+              <tr style={{ width: '100%' }}>
+                {indexitem == 0 ? 
+                  <td style={{ width: '100%' }}>  
+                  { revnode == global.FLATSTONE_BLACK && 
+                    <div style={{width: '100%', height: '75px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                    </div>
+                  }
+                  { revnode == global.FLATSTONE_WHITE && 
+                    <div style={{width: '100%', height: '75px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                    </div>
+                  }
+                  { revnode == global.WALLSTONE_BLACK && 
+                    <div style={{width: '10%', marginLeft: '45%', height: '75px', backgroundColor: 'black', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                    </div>
+                  }
+                  { revnode == global.WALLSTONE_WHITE && 
+                    <div style={{width: '10%', marginLeft: '45%', height: '75px', backgroundColor: 'white', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                    </div>
+                  }
+                  { revnode == global.CAPSTONE_BLACK && 
+                    <div style={{width: '80%', marginLeft: '10%', height: '75px', backgroundColor: 'black', borderRadius: '100%', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                    </div>
+                  }
+                  { revnode == global.CAPSTONE_WHITE && 
+                    <div style={{width: '80%', marginLeft: '10%', height: '75px', backgroundColor: 'white', borderRadius: '100%', border: '0px solid black', padding: '0px', fontWeight: 'bold', fontSize: '12px'}}>
+                    </div>
+                  }
+                  </td> : null
+                }
+              </tr>
+            }
+          </>
+        ))}
+      </table>
+    </div>
+  }
+
   return (
     <>
       <div className="flex justify-center items-center flex-col h-full w-full bg-gray-600">
@@ -844,7 +898,14 @@ function App() {
             </div>
           </div>
           <div className='flex flex-wrap w-full'>
-            <div className='ml-2 border-1'>{showStackInHand()}</div>
+            {/* <input 
+                type='button' 
+                onClick={() => runAI() }
+                value="Run AI" 
+                className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition duration-300" 
+            /> */}
+            <div className='border-1'>Stack in Hand : {showStackInHand()}</div>
+            <div className='ml-32 border-1'>Current Stack : {showCurrentStack()}</div>
           </div>
           <div className="mt-4">
             {jumMelangkah >= 2 && (
@@ -914,6 +975,7 @@ function App() {
         </table>
       </div>
     </>
-  )}
+  )
+}
 
 export default App
