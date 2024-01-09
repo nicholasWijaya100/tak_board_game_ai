@@ -27,7 +27,6 @@ function App() {
   var [stackAngkat, setStackAngkat] = useState([]);
   var [selectedStack, setSelectedStack] = useState([]);
   const [tempArr, setTempArr] = useState([]);
-  const [refresh, setRefresh] = useState(1);
   
   useEffect(() => {
   }, []);
@@ -433,7 +432,7 @@ function App() {
                       else if(arah == 1) { status['koin'] = "moveright"; }
                       else if(arah == 2) { status['koin'] = "movedown"; }
                       else if(arah == 3) { status['koin'] = "moveleft"; }
-                      status['value'] = value;
+                      status['value'] = -1;
                     }
                     _alpha = Math.max(_alpha, status["maxweight"])
                     if(_alpha >= _beta) 
@@ -459,7 +458,7 @@ function App() {
     }
   }
 
-  function runAI(_giliran) {
+  function runAI() {
     var level = 1
     var result = [];
     result['maxweight'] = 0;
@@ -467,35 +466,35 @@ function App() {
     result['kol'] = -1;
     result['koin'] = -1;
     result['value'] = 99;
-    maksimum(level, _giliran, papan, result, -Infinity, Infinity);
+    maksimum(level, giliran, papan, result, -Infinity, Infinity);
     console.log("posisi AI ambil = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol'] + " ---- " + result['koin']);
 
     if (result['koin'] == "moveup") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah moveup");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], _giliran, _arr, -1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
       papan.arr = _arr;
     }
     else if (result['koin'] == "moveright") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah moveright");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], _giliran, _arr, 0, 1, result['value']);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, 0, 1, result['value']);
       papan.arr = _arr;
     }
     else if (result['koin'] == "movedown") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah movedown");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], _giliran, _arr, 1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, 1, 0, result['value']);
       papan.arr = _arr;
     }
     else if (result['koin'] == "moveleft") {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah moveleft"); 
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], _giliran, _arr, -1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
       papan.arr = _arr;
     }
     else {
@@ -520,6 +519,8 @@ function App() {
 
     if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
     else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
+
+    gantiGiliran();
   }
 
   function arraysEqual(a, b) {
@@ -632,14 +633,6 @@ function App() {
           else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
           
           gantiGiliran(); 
-          setTimeout(function() {
-            runAI(global.BLACKTURN);
-            if(refresh == 1) {
-              setRefresh(2);
-            } else {
-              setRefresh(1);
-            }
-          }, 2000);
       }
     } else {
       if(brsAngkat == -1) {
@@ -674,14 +667,6 @@ function App() {
           if(stackAngkat.length == 1) {
             setBrsAngkat(-1); setKlmAngkat(-1); setBrsDirection(-1); setKlmDirection(-1); setLastBrs(-1); setLastKlm(-1); 
             gantiGiliran();
-            setTimeout(function() {
-              runAI(global.BLACKTURN);
-              if(refresh == 1) {
-                setRefresh(2);
-              } else {
-                setRefresh(1);
-              }
-            }, 2000);
           }
           else {
             if(brsDirection == -1 && klmDirection == -1) {
