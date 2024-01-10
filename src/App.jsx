@@ -356,6 +356,7 @@ function App() {
       status['kol'] = -1;
       status['koin'] = -1;
 
+      var win = false;
       for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
           if (_papan.arr[i][j].length == 0)     // jika kotak tsb kondisi kosong
@@ -363,11 +364,13 @@ function App() {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              if(!(findWeight(new Clsboard(_giliran, _arr)) < -5000)) {
-                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-              } else {
-                var weight = findWeight(new Clsboard(_giliran, _arr));
-              }
+              var weight = findWeight(new Clsboard(_giliran, _arr));
+              if(!(weight < -5000)) {
+                weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              } 
+              if((weight < -5000)) {
+                win = true;
+              } 
 
               //console.log("level " + _level + " -> after maksimum = " + i + ", " + j + " = " + weight); 
 
@@ -378,8 +381,17 @@ function App() {
                 status['koin'] = pilihanKoin[k];
               }
               _arr[i][j].pop();
+              if(win) {
+                break;
+              }
             }
           }
+          if(win) {
+            break;
+          }
+        }
+        if(win) {
+          break;
         }
       }
       
@@ -427,6 +439,7 @@ function App() {
       status['kol'] = -1;
       status['koin'] = -1;
 
+      var win = false;
       //Gerak AI ke-1 --> menaruh stone
       for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
@@ -435,7 +448,13 @@ function App() {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              var weight = findWeight(new Clsboard(_giliran, _arr));
+              if(!(weight > 5000)) {
+                weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              }
+              if(weight > 5000) {
+                win = true;
+              }
 
               //console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight); 
 
@@ -446,8 +465,18 @@ function App() {
                 status['koin'] = pilihanKoin[k];
               }
               _arr[i][j].pop();
+
+              if(win) {
+                break;
+              }
             }
           }
+          if(win) {
+            break;
+          }
+        }
+        if(win) {
+          break;
         }
       }
 
