@@ -577,15 +577,23 @@ function App() {
       }
     }
 
-    // cek menang 
-    var trace = []; 
-    trace = [];  var flagKiri = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "KIRI");
-    trace = [];  var flagKanan = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "KANAN");
-    trace = [];  var flagAtas = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "ATAS");
-    trace = [];  var flagBawah = checkIfConnectedWithBorder(papan.arr, result['bar'], result['kol'], giliran, trace, "BAWAH");
+    var menang = false;
+    for(var i = 0; i < 5; i++) {
+      for(var j = 0; j < 5; j++) {
+        // cek menang 
+        var trace = []; 
+        trace = [];  var flagKiri = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "KIRI");
+        trace = [];  var flagKanan = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "KANAN");
+        trace = [];  var flagAtas = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "ATAS");
+        trace = [];  var flagBawah = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "BAWAH");
 
-    if(flagKiri == true && flagKanan == true) { alert('horizontal win'); }
-    else if(flagAtas == true && flagBawah == true) { alert('vertical win'); }
+        if(flagKiri == true && flagKanan == true) { alert('horizontal win'); menang = true; break; }
+        else if(flagAtas == true && flagBawah == true) { alert('vertical win'); menang = true; break; }
+      }
+      if(menang) {
+        break;
+      }
+    }
 
     gantiGiliran();
   }
@@ -734,6 +742,23 @@ function App() {
           setStackAngkat(stackAngkat.filter((item, index) => index != 0));
           if(stackAngkat.length == 1) {
             setBrsAngkat(-1); setKlmAngkat(-1); setBrsDirection(-1); setKlmDirection(-1); setLastBrs(-1); setLastKlm(-1); 
+            var menang = false;
+            for(var i = 0; i < 5; i++) {
+              for(var j = 0; j < 5; j++) {
+                // cek menang 
+                var trace = []; 
+                trace = [];  var flagKiri = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "KIRI");
+                trace = [];  var flagKanan = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "KANAN");
+                trace = [];  var flagAtas = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "ATAS");
+                trace = [];  var flagBawah = checkIfConnectedWithBorder(papan.arr, i, j, giliran, trace, "BAWAH");
+
+                if(flagKiri == true && flagKanan == true) { alert('horizontal win'); menang = true; break; }
+                else if(flagAtas == true && flagBawah == true) { alert('vertical win'); menang = true; break; }
+              }
+              if(menang) {
+                break;
+              }
+            }
             gantiGiliran();
           }
           else {
