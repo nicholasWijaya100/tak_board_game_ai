@@ -36,15 +36,7 @@ function App() {
   }
 
   function findWeight(_papan) {
-    var weight = 0;
-    var notgiliran = giliran;
-
-    if (giliran == global.BLACKTURN) {
-      notgiliran = global.WHITETURN;
-    }
-    else {
-      notgiliran = global.BLACKTURN;
-    }   
+    var weight = 0;   
 
     var playerMenang = false;
     var indexPlayerDariKiri = 0;
@@ -99,12 +91,12 @@ function App() {
     var indexLawanDariBawah = 0;
     for(var i = 0; i < 5; i++) {
       for(var j = 0; j < 5; j++) {
-        var traceFlagKiriLawan = [];  var flagKiriLawan = checkIfConnectedWithBorder(_papan.arr, i, j, notgiliran, traceFlagKiriLawan, "KIRI");
-        var traceFlagKananLawan = [];  var flagKananLawan = checkIfConnectedWithBorder(_papan.arr, i, j, notgiliran, traceFlagKananLawan, "KANAN");
-        var traceFlagAtasLawan = [];  var flagAtasLawan = checkIfConnectedWithBorder(_papan.arr, i, j, notgiliran, traceFlagAtasLawan, "ATAS");
-        var traceFlagBawahLawan = [];  var flagBawahLawan = checkIfConnectedWithBorder(_papan.arr, i, j, notgiliran, traceFlagBawahLawan, "BAWAH");
+        var traceFlagKiriLawan = [];  var flagKiriLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagKiriLawan, "KIRI");
+        var traceFlagKananLawan = [];  var flagKananLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagKananLawan, "KANAN");
+        var traceFlagAtasLawan = [];  var flagAtasLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagAtasLawan, "ATAS");
+        var traceFlagBawahLawan = [];  var flagBawahLawan = checkIfConnectedWithBorder(_papan.arr, i, j, !giliran, traceFlagBawahLawan, "BAWAH");
 
-        if((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan)) {
+        if(((flagKiriLawan && flagKananLawan) || (flagAtasLawan && flagBawahLawan))) {
           lawanMenang = true
         }
 
@@ -136,7 +128,7 @@ function App() {
     }
 
     if(lawanMenang) {
-      weight = weight - 12000;
+      weight = weight - 10000;
     }
     weight = weight + indexLawanDariAtas + indexLawanDariBawah + indexLawanDariKanan + indexLawanDariKiri;
     
@@ -146,18 +138,18 @@ function App() {
           var t = _papan.arr[i][j].length - 1; 
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
-              weight = weight + (1 * _papan.arr[i][j].length); 
+              weight = weight + 1; 
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
-              weight = weight - (1 * _papan.arr[i][j].length); 
+              weight = weight - 1; 
             } 
           }
           else {
             if(_papan.arr[i][j][t] <= 13) {
-              weight = weight - (1 * _papan.arr[i][j].length);
+              weight = weight - 1;
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
-              weight = weight + (1 * _papan.arr[i][j].length); 
+              weight = weight + 1; 
             }  
           }
         }
@@ -255,7 +247,7 @@ function App() {
             if (stackAI.length == 0) { enough = true; }
             else {
               var palingBawah = stackAI[0];
-              //console.log("cek = " + moveBrs + "," + moveKlm + " => " + vb + "," + vk + "=> " + db + "," + dk + "-" + vmode);
+              console.log("cek = " + moveBrs + "," + moveKlm + " => " + vb + "," + vk + "=> " + db + "," + dk + "-" + vmode);
               _arr[moveBrs][moveKlm].push(palingBawah);
               if (vgiliran == global.BLACKTURN && palingBawah <= global.CAPSTONE_BLACK) { enough = true; }
               else if (vgiliran == global.WHITETURN && palingBawah > global.CAPSTONE_BLACK && palingBawah <= global.CAPSTONE_WHITE) { enough = true; }
@@ -281,28 +273,28 @@ function App() {
             }
           }
           else if (stackAI.length == 0) {
-            //console.log("habis = movebrs = " + moveBrs + " - vb = " + vb);
+            console.log("habis = movebrs = " + moveBrs + " - vb = " + vb);
             if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) { moveFlag = -1; }
             else { moveFlag = 1; }
           }
           else {
-            //console.log("masuk sini " + moveBrs + "***" + moveKlm);
+            console.log("masuk sini " + moveBrs + "***" + moveKlm);
             var len2 = _arr[moveBrs][moveKlm].length;
             if (len2 != 0) {
-              //console.log("masuk sini lagi");
+              console.log("masuk sini lagi");
               var topval = _arr[moveBrs][moveKlm][len2 - 1];
               if (vgiliran == global.BLACKTURN && topval != global.FLATSTONE_BLACK) {  // tidak boleh naik 
-                //console.log("tidak boleh naik");
+                console.log("tidak boleh naik");
                 if ((db != 0 && moveBrs == vb + db) || (dk != 0 && moveKlm == vk + dk)) {
                   moveFlag = -2;
-                  //console.log(db + "***" + dk);
-                  //console.log(moveBrs + "***" + moveKlm);
+                  console.log(db + "***" + dk);
+                  console.log(moveBrs + "***" + moveKlm);
                 }
                 else {
-                  //console.log("kesini");
+                  console.log("kesini");
                   moveFlag = 1;
                   moveBrs += (db * -1); moveKlm += (dk * -1);
-                  //console.log("masuk sini " + moveBrs + "***" + moveKlm);
+                  console.log("masuk sini " + moveBrs + "***" + moveKlm);
                   while (stackAI.length > 0) {
                     var palingBawah = stackAI[0];
                     _arr[moveBrs][moveKlm].push(palingBawah);
@@ -325,8 +317,11 @@ function App() {
     return moveFlag;
   }
 
-  function minimum(_level, _giliran, _papan, _result) {
+  function minimum(_level, _giliran, _papan, _result, _alpha, _beta) {
     if(_level > maxLevel) {
+      if(findWeight(_papan) < -100) {
+        console.log(_papan);
+      }
       return findWeight(_papan);
     }
     else {
@@ -351,31 +346,32 @@ function App() {
       }
 
       var status = []; 
-      status['maxweight'] = 70000;
+      status['maxweight'] = Infinity;
       status['bar'] = -1;
       status['kol'] = -1;
       status['koin'] = -1;
 
       for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
-          if (_papan.arr[i][j].length == 0)     // jika kotak tsb kondisi kosong
+          if (_papan.arr[i][j].length == 0) 
           {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              if(!(findWeight(new Clsboard(_giliran, _arr)) < -5000)) {
-                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-              } else {
-                var weight = findWeight(new Clsboard(_giliran, _arr));
-              }
+              var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
 
-              //console.log("level " + _level + " -> after maksimum = " + i + ", " + j + " = " + weight); 
+              console.log("level " + _level + " -> after maksimum = " + i + ", " + j + " = " + weight); 
 
               if (weight < status['maxweight']) {
                 status['maxweight'] = weight;
                 status['bar'] = i;
                 status['kol'] = j;
                 status['koin'] = pilihanKoin[k];
+              }
+              _beta = Math.min(_beta, status["maxweight"]);
+              if(_beta <= _alpha) {
+                console.log('prune beta 1');
+                break;
               }
               _arr[i][j].pop();
             }
@@ -393,7 +389,7 @@ function App() {
     }
   }
 
-  function maksimum(_level, _giliran, _papan, _result) {
+  function maksimum(_level, _giliran, _papan, _result, _alpha, _beta) {
     if(_level <= maxLevel) {
       var pilihanKoin = [];
       var _notgiliran = _giliran;
@@ -422,7 +418,7 @@ function App() {
       }
 
       var status = []; 
-      status['maxweight'] = -70000;
+      status['maxweight'] = -Infinity;
       status['bar'] = -1;
       status['kol'] = -1;
       status['koin'] = -1;
@@ -435,9 +431,9 @@ function App() {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
 
-              //console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight); 
+              console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight); 
 
               if (weight > status['maxweight']) {
                 status['maxweight'] = weight;
@@ -445,6 +441,11 @@ function App() {
                 status['kol'] = j;
                 status['koin'] = pilihanKoin[k];
               }
+              _alpha = Math.max(_alpha, status["maxweight"])
+              if(_alpha >= _beta){
+                console.log('prune alpha 1');
+                break;
+              };
               _arr[i][j].pop();
             }
           }
@@ -474,10 +475,10 @@ function App() {
                   var _arr = copyArray(_papan.arr);
                   var moveFlag = tryMoving(i, j, _giliran, _arr, db, dk, value);
                   if (moveFlag == 1) {
-                    //console.log("masuk 2 = " + i + "," + j);
+                    console.log("masuk 2 = " + i + "," + j);
                     // _arr yg isinya adalah papan yg sudah berubah sesuai disribusi koin
-                    var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
-                    //console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
+                    var weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
+                    console.log("level " + _level + " -> after minimum = " + i + ", " + j + " = " + weight);
                     if (weight > status['maxweight']) {
                       status['maxweight'] = weight;
                       status['bar'] = i;
@@ -487,6 +488,12 @@ function App() {
                       else if(arah == 2) { status['koin'] = "movedown"; }
                       else if(arah == 3) { status['koin'] = "moveleft"; }
                       status['value'] = -1;
+                    }
+                    _alpha = Math.max(_alpha, status["maxweight"])
+                    if(_alpha >= _beta) 
+                    {
+                      console.log('prune alpha 2');
+                      break;
                     }
                   }
                   value = -1;
@@ -514,7 +521,7 @@ function App() {
     result['kol'] = -1;
     result['koin'] = -1;
     result['value'] = 99;
-    maksimum(level, giliran, papan, result);
+    maksimum(level, giliran, papan, result, -Infinity, Infinity);
     console.log("posisi AI ambil = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol'] + " ---- " + result['koin']);
 
     if (result['koin'] == "moveup") {
@@ -540,7 +547,7 @@ function App() {
     }
     else if (result['koin'] == "moveleft") {
       console.log("posisi AI ambil = " + result['value']);
-      console.log("ubah moveleft");
+      console.log("ubah moveleft"); 
       var _arr = copyArray(papan.arr);
       tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
       papan.arr = _arr;
@@ -571,7 +578,6 @@ function App() {
     gantiGiliran();
   }
 
-
   function arraysEqual(a, b) {
     if (a.length !== b.length) return false;
 
@@ -587,7 +593,7 @@ function App() {
         }
     }
     return true;
-  }
+}
 
 
   function gantiGiliran() {

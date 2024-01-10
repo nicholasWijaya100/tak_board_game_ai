@@ -302,7 +302,11 @@ function App() {
             var _arr = copyArray(_papan.arr);
             for (var k = 0; k < pilihanKoin.length; k++) {
               _arr[i][j].push(pilihanKoin[k]);
-              var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              if(!(findWeight(new Clsboard(_giliran, _arr)) < -5000)) {
+                var weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+              } else {
+                var weight = findWeight(new Clsboard(_giliran, _arr));
+              }
 
               console.log("level " + _level + " -> after maksimum = " + i + ", " + j + " = " + weight); 
 
