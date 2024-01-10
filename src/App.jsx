@@ -465,18 +465,8 @@ function App() {
                 status['koin'] = pilihanKoin[k];
               }
               _arr[i][j].pop();
-
-              if(win) {
-                break;
-              }
             }
           }
-          if(win) {
-            break;
-          }
-        }
-        if(win) {
-          break;
         }
       }
 
