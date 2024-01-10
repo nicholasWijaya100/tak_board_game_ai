@@ -900,7 +900,7 @@ function App() {
   }
 
   function setHoveredCell(brs, klm){
-    var stackLength = papan.arr[brs][klm].length <= 5 ? papan.arr[brs][klm].length : 5;
+    var stackLength = papan.arr[brs][klm].length;
     setSelectedStack(papan.arr[brs][klm].slice(-1 * stackLength));
   }
 
