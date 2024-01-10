@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import global from './Global'
 import { Clsboard } from './Clsboard'
+import Board from '../src/assets/tak_bg.jpg'
 
 function App() {
   var [papan, setPapan] = useState(
@@ -147,13 +148,13 @@ function App() {
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight + (1 * _papan.arr[i][j].length); 
-              if(_papan.arr[i][j][t] == 13 && jumMelangkah >= 4) {
+              if(_papan.arr[i][j][t] == 13 && jumMelangkah >= 7) {
                 weight = weight + 5;
               }
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight - (1 * _papan.arr[i][j].length); 
-              if(_papan.arr[i][j][t] == 23 && jumMelangkah >= 4) {
+              if(_papan.arr[i][j][t] == 23 && jumMelangkah >= 7) {
                 weight = weight + 5;
               }
             } 
@@ -161,13 +162,13 @@ function App() {
           else {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight - (1 * _papan.arr[i][j].length);
-              if(_papan.arr[i][j][t] == 13 && jumMelangkah >= 4) {
+              if(_papan.arr[i][j][t] == 13 && jumMelangkah >= 7) {
                 weight = weight + 5;
               }
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight + (1 * _papan.arr[i][j].length); 
-              if(_papan.arr[i][j][t] == 23 && jumMelangkah >= 4) {
+              if(_papan.arr[i][j][t] == 23 && jumMelangkah >= 7) {
                 weight = weight + 5;
               }
             }  
@@ -337,7 +338,7 @@ function App() {
     return moveFlag;
   }
 
-  function minimum(_level, _giliran, _papan, _result) {
+  function minimum(_level, _giliran, _papan, _result, _alpha, _beta) {
     if(_level > maxLevel) {
       return findWeight(_papan);
     }
@@ -378,7 +379,7 @@ function App() {
               _arr[i][j].push(pilihanKoin[k]);
               var weight = findWeight(new Clsboard(_giliran, _arr));
               if(!(weight < -5000)) {
-                weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                weight = maksimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
               } 
               if((weight < -5000)) {
                 win = true;
@@ -391,6 +392,11 @@ function App() {
                 status['bar'] = i;
                 status['kol'] = j;
                 status['koin'] = pilihanKoin[k];
+              }
+              _beta = Math.min(_beta, status["maxweight"]);
+              if(_beta <= _alpha) {
+                // console.log('prune beta 1');
+                break;
               }
               _arr[i][j].pop();
               if(win) {
@@ -417,7 +423,7 @@ function App() {
     }
   }
 
-  function maksimum(_level, _giliran, _papan, _result) {
+  function maksimum(_level, _giliran, _papan, _result, _alpha, _beta) {
     if(_level <= maxLevel) {
       var pilihanKoin = [];
       var _notgiliran = _giliran;
@@ -462,7 +468,7 @@ function App() {
               _arr[i][j].push(pilihanKoin[k]);
               var weight = findWeight(new Clsboard(_giliran, _arr));
               if(!(weight > 5000)) {
-                weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result);
+                weight = minimum(_level + 1, _notgiliran, new Clsboard(_giliran, _arr), _result, _alpha, _beta);
               }
               if(weight > 5000) {
                 win = true;
@@ -475,6 +481,11 @@ function App() {
                 status['bar'] = i;
                 status['kol'] = j;
                 status['koin'] = pilihanKoin[k];
+              }
+              _alpha = Math.max(_alpha, status["maxweight"]);
+              if(_alpha >= _beta ) {
+                // console.log('prune beta 1');
+                break;
               }
               _arr[i][j].pop();
             }
@@ -519,6 +530,11 @@ function App() {
                       else if(arah == 3) { status['koin'] = "moveleft"; }
                       status['value'] = -1;
                     }
+                    _alpha = Math.max(_alpha, status["maxweight"]);
+                    if(_alpha >= _beta ) {
+                      // console.log('prune beta 1');
+                      break;
+                    }
                   }
                   value = -1;
                 }
@@ -545,7 +561,7 @@ function App() {
     result['kol'] = -1;
     result['koin'] = -1;
     result['value'] = 99;
-    maksimum(level, giliran, papan, result);
+    maksimum(level, giliran, papan, result, -Infinity, Infinity);
     console.log("posisi AI ambil = " + result['maxweight'] + " --- " + result['bar'] + " ---- " + result['kol'] + " ---- " + result['koin']);
 
     if (result['koin'] == "moveup") {
@@ -796,7 +812,7 @@ function App() {
   }
 
   function showStackInHand() {
-    return <div className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00AAFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key='stackInHand'>
+    return <div className="stack-container pt-5 mx-auto" style={{ width: "80%" }}>
       <table style={{ width: '100%' }}>
         {stackAngkat.slice().reverse().map((revnode, indexitem) => (
           <>
@@ -870,7 +886,7 @@ function App() {
   }
 
   function showCurrentStack() {
-    return <div className='card' style={{ width: '100px', height: '80px', borderRadius: '2px', backgroundColor: '#00AAFF', boxSizing: 'border-box', padding: '1px', margin: '1px' }} key='stackInHand'>
+    return <div className="stack-container pt-5 mx-auto" style={{ width: "80%" }}>
       <table style={{ width: '100%' }}>
         {selectedStack.slice().reverse().map((revnode, indexitem) => (
           <>
@@ -965,74 +981,118 @@ function App() {
 
   return (
     <>
-      <div className="flex justify-center items-center flex-col h-full w-full bg-gray-600">
-        <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg my-12">
-          <h4 className="text-2xl font-bold text-gray-800 mb-3">Tak Board Game</h4>
+     <div className="flex justify-center items-center h-full w-full bg-gray-900">
+        <div className="max-w-2xl mx-5 p-6 bg-white shadow-lg rounded-lg my-12">
+          <h4 className="text-2xl font-bold text-gray-800 mb-3">
+            Tak Board Game
+          </h4>
           <div className="mb-4">
             <h5 className="text-lg font-medium text-gray-600">
-                Giliran: <span className="text-gray-800">{giliran === 1 ? "BLACK" : "WHITE"}</span>
+              Giliran:{" "}
+              <span className="text-gray-800">
+                {giliran === 1 ? "BLACK" : "WHITE"}
+              </span>
             </h5>
-            <h5 className="text-lg font-medium text-gray-600">Jumlah Stone Di Tangan Player White:</h5>
+            <h5 className="text-lg font-medium text-gray-600">
+              Jumlah Stone Di Tangan Player White:
+            </h5>
             <div className="text-sm text-gray-700 pl-4">
-                Flatstones: {global.NUMBER_OF_WHITE_FLATSTONE}
+              Flatstones: {global.NUMBER_OF_WHITE_FLATSTONE}
             </div>
             <div className="text-sm text-gray-700 pl-4">
-                Capstones: {global.NUMBER_OF_WHITE_CAPSTONE}
+              Capstones: {global.NUMBER_OF_WHITE_CAPSTONE}
             </div>
-            <h5 className="text-lg font-medium text-gray-600">Jumlah Stone Di Tangan Player Black:</h5>
+            <h5 className="text-lg font-medium text-gray-600">
+              Jumlah Stone Di Tangan Player Black:
+            </h5>
             <div className="text-sm text-gray-700 pl-4">
-                Flatstones: {global.NUMBER_OF_BLACK_FLATSTONE}
+              Flatstones: {global.NUMBER_OF_BLACK_FLATSTONE}
             </div>
             <div className="text-sm text-gray-700 pl-4">
-                Capstones: {global.NUMBER_OF_BLACK_CAPSTONE}
+              Capstones: {global.NUMBER_OF_BLACK_CAPSTONE}
             </div>
           </div>
-          <div className='flex flex-wrap w-full'>
-            <input 
-                type='button' 
-                onClick={() => runAI() }
-                value="Run AI" 
-                className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition duration-300" 
+          <div className="flex flex-wrap w-100">
+            <input
+              type="button"
+              onClick={() => runAI()}
+              value="Run AI"
+              className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition duration-300"
             />
-            <div className='ml-10 border-1'>Stack in Hand : {showStackInHand()}</div>
-            <div className='ml-10 border-1'>Current Stack : {showCurrentStack()}</div>
           </div>
           <div className="mt-4">
             {jumMelangkah >= 2 && (
               <div className="flex items-center space-x-4">
-                 {jumMelangkah >= 2 && (
+                {jumMelangkah >= 2 && (
                   <>
                     <label>
-                      <input 
-                        type="radio" 
-                        name="stoneType" 
+                      <input
+                        type="radio"
+                        name="stoneType"
                         value="flatstone"
-                        onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)} 
-                        checked={selectedStone === (giliran === global.BLACKTURN ? global.FLATSTONE_BLACK : global.FLATSTONE_WHITE)}
+                        onChange={() =>
+                          selectStoneType(
+                            giliran === global.BLACKTURN
+                              ? global.FLATSTONE_BLACK
+                              : global.FLATSTONE_WHITE
+                          )
+                        }
+                        checked={
+                          selectedStone ===
+                          (giliran === global.BLACKTURN
+                            ? global.FLATSTONE_BLACK
+                            : global.FLATSTONE_WHITE)
+                        }
                         className="form-radio text-blue-600"
                       />
-                      <span className="text-gray-700 capitalize">Flatstone</span>
+                      <span className="text-gray-700 capitalize">
+                        Flatstone
+                      </span>
                     </label>
 
                     <label>
-                      <input 
-                        type="radio" 
-                        name="stoneType" 
+                      <input
+                        type="radio"
+                        name="stoneType"
                         value="wallstone"
-                        onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.WALLSTONE_BLACK : global.WALLSTONE_WHITE)} 
-                        checked={selectedStone === (giliran === global.BLACKTURN ? global.WALLSTONE_BLACK : global.WALLSTONE_WHITE)}
+                        onChange={() =>
+                          selectStoneType(
+                            giliran === global.BLACKTURN
+                              ? global.WALLSTONE_BLACK
+                              : global.WALLSTONE_WHITE
+                          )
+                        }
+                        checked={
+                          selectedStone ===
+                          (giliran === global.BLACKTURN
+                            ? global.WALLSTONE_BLACK
+                            : global.WALLSTONE_WHITE)
+                        }
                         className="form-radio text-blue-600"
                       />
-                      <span className="text-gray-700 capitalize">Wallstone</span>
+                      <span className="text-gray-700 capitalize">
+                        Wallstone
+                      </span>
                     </label>
 
                     <label>
-                      <input 
-                        type="radio" 
-                        name="stoneType" 
+                      <input
+                        type="radio"
+                        name="stoneType"
                         value="capstone"
-                        onChange={() => selectStoneType(giliran === global.BLACKTURN ? global.CAPSTONE_BLACK : global.CAPSTONE_WHITE)} 
-                        checked={selectedStone === (giliran === global.BLACKTURN ? global.CAPSTONE_BLACK : global.CAPSTONE_WHITE)}
+                        onChange={() =>
+                          selectStoneType(
+                            giliran === global.BLACKTURN
+                              ? global.CAPSTONE_BLACK
+                              : global.CAPSTONE_WHITE
+                          )
+                        }
+                        checked={
+                          selectedStone ===
+                          (giliran === global.BLACKTURN
+                            ? global.CAPSTONE_BLACK
+                            : global.CAPSTONE_WHITE)
+                        }
                         className="form-radio text-blue-600"
                       />
                       <span className="text-gray-700 capitalize">Capstone</span>
@@ -1043,26 +1103,55 @@ function App() {
             )}
           </div>
         </div>
-        <table className="border-0 mb-10">
-          <tbody>
-            {papan.arr.map((item, indexbar) => (
-              <tr key={indexbar}>
-                {indexbar == 0 ? (
-                  <td></td>
-                ) : (
-                  <td></td>
-                )}
-                {item.map((node, indexkol) => (
-                  <td key={indexkol} className="border">
-                    {(indexbar == brsAngkat && indexkol == klmAngkat)
-                      ? CellSelectedStack(indexbar, indexkol, node)
-                      : CellNormal(indexbar, indexkol, node)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        <div
+          className="max-w-2xl p-6 bg-white shadow-lg rounded-lg my-12 mr-5"
+          style={{ width: "300px", height: "320px" }}
+        >
+          <h4 className="text-2xl font-bold text-gray-800 mb-3">
+            Stack in hand 🫳
+          </h4>
+          <div className="w-full h-3/4 bg-slate-400">{showStackInHand()}</div>
+        </div>
+
+        <div
+          className="max-w-2xl p-6 bg-white shadow-lg rounded-lg my-12"
+          style={{ width: "300px", height: "320px" }}
+        >
+          <h4 className="text-2xl font-bold text-gray-800 mb-3">
+            Selected Stack ♟️
+          </h4>
+          <div className="w-full h-3/4 bg-slate-400">{showCurrentStack()}</div>
+        </div>
+      </div>
+
+      {/* Board */}
+      <div className="flex justify-center items-center h-full w-full bg-gray-900">
+        <div
+          className="w-auto h-auto p-10 bg-red-900 mb-10"
+          style={{
+            backgroundImage: `url(${Board})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <table className="border-0">
+            <tbody>
+              {papan.arr.map((item, indexbar) => (
+                <tr key={indexbar}>
+                  {indexbar == 0 ? <td></td> : <td></td>}
+                  {item.map((node, indexkol) => (
+                    <td key={indexkol}>
+                      {indexbar == brsAngkat && indexkol == klmAngkat
+                        ? CellSelectedStack(indexbar, indexkol, node)
+                        : CellNormal(indexbar, indexkol, node)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   )
