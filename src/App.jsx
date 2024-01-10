@@ -147,6 +147,7 @@ function App() {
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight + (1 * _papan.arr[i][j].length); 
+              
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight - (1 * _papan.arr[i][j].length); 
@@ -561,7 +562,7 @@ function App() {
       console.log("posisi AI ambil = " + result['value']);
       console.log("ubah moveleft");
       var _arr = copyArray(papan.arr);
-      tryMoving(result['bar'], result['kol'], giliran, _arr, -1, 0, result['value']);
+      tryMoving(result['bar'], result['kol'], giliran, _arr, 0, -1, result['value']);
       papan.arr = _arr;
     }
     else {
