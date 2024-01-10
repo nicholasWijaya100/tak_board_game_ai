@@ -147,18 +147,29 @@ function App() {
           if(_papan.giliran == global.BLACKTURN) {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight + (1 * _papan.arr[i][j].length); 
-              
+              if(_papan.arr[i][j][t] == 13 && jumMelangkah >= 4) {
+                weight = weight + 5;
+              }
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight - (1 * _papan.arr[i][j].length); 
+              if(_papan.arr[i][j][t] == 23 && jumMelangkah >= 4) {
+                weight = weight + 5;
+              }
             } 
           }
           else {
             if(_papan.arr[i][j][t] <= 13) {
               weight = weight - (1 * _papan.arr[i][j].length);
+              if(_papan.arr[i][j][t] == 13 && jumMelangkah >= 4) {
+                weight = weight + 5;
+              }
             }
             else if(_papan.arr[i][j][t] >= 21 && _papan.arr[i][j][t] <= 23) {
               weight = weight + (1 * _papan.arr[i][j].length); 
+              if(_papan.arr[i][j][t] == 23 && jumMelangkah >= 4) {
+                weight = weight + 5;
+              }
             }  
           }
         }
